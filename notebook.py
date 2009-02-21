@@ -10,8 +10,7 @@ class Notebook(aui.AuiNotebook):
     def __init__(self, parent):
         style = wx.BORDER_NONE | aui.AUI_NB_CLOSE_BUTTON | aui.AUI_NB_TAB_MOVE | aui.AUI_NB_SCROLL_BUTTONS | aui.AUI_NB_WINDOWLIST_BUTTON
         super(Notebook, self).__init__(parent, -1, style=style)
-        self.SetUniformBitmapSize((18, 18))
-        #self.SetTabCtrlHeight(40)
+        self.SetUniformBitmapSize((21, 21))
     def on_left_dclick(self, event):
         x, y = event.GetPosition()
         control = event.GetEventObject()
@@ -54,6 +53,12 @@ class Notebook(aui.AuiNotebook):
             window = self.get_window(index)
             self.RemovePage(index)
             window.Destroy()
+        if self.GetPageCount() == 0:
+            self.create_tab()
+    def close_tabs(self):
+        n = self.GetPageCount()
+        for i in range(n):
+            self.close_tab(0)
     def get_window(self, index=None):
         if index is None: index = self.GetSelection()
         return self.GetPage(index) if index >= 0 else None

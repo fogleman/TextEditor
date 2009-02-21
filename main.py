@@ -50,7 +50,6 @@ class Frame(wx.Frame):
         tabs = notebook.Notebook(self)
         self.notebook = tabs
         tabs.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
-        #tabs.create_tab()
         info = aui.AuiPaneInfo()
         info.CentrePane()
         info.PaneBorder(False)
@@ -71,10 +70,10 @@ class Frame(wx.Frame):
         util.menu_item(self, file, '&Open...\tCtrl+O', self.on_open, 'folder_page.png')
         util.menu_item(self, file, '&Save\tCtrl+S', self.on_save, 'disk.png')
         util.menu_item(self, file, '&Save As...\tCtrl+Shift+S', self.on_save_as, 'disk.png')
-        util.menu_item(self, file, 'Save All', self.on_event, 'disk_multiple.png')
+        util.menu_item(self, file, 'Save All', self.on_save_all, 'disk_multiple.png')
         file.AppendSeparator()
-        util.menu_item(self, file, 'Close\tCtrl+F4', self.on_event, 'folder_delete.png')
-        util.menu_item(self, file, 'Close All', self.on_event, 'folder_delete.png')
+        util.menu_item(self, file, 'Close\tCtrl+F4', self.on_close_tab, 'folder_delete.png')
+        util.menu_item(self, file, 'Close All\tCtrl+Shift+F4', self.on_close_tabs, 'folder_delete.png')
         file.AppendSeparator()
         util.menu_item(self, file, 'Reload', self.on_event, 'drive_go.png')
         util.menu_item(self, file, 'Rename...', self.on_event, 'page_go.png')
@@ -93,10 +92,11 @@ class Frame(wx.Frame):
         util.menu_item(self, edit, 'Copy\tCtrl+C', self.on_copy, 'page_copy.png')
         util.menu_item(self, edit, 'Paste\tCtrl+V', self.on_paste, 'paste_plain.png')
         util.menu_item(self, edit, 'Delete\tDel', self.on_delete, 'delete.png')
+        edit.AppendSeparator()
         util.menu_item(self, edit, 'Select All\tCtrl+A', self.on_select_all, 'table_go.png')
         edit.AppendSeparator()
-        util.menu_item(self, edit, 'Lowercase', self.on_event, 'text_lowercase.png')
-        util.menu_item(self, edit, 'Uppercase', self.on_event, 'text_uppercase.png')
+        util.menu_item(self, edit, 'Lowercase', self.on_lowercase, 'text_lowercase.png')
+        util.menu_item(self, edit, 'Uppercase', self.on_uppercase, 'text_uppercase.png')
         menubar.Append(edit, '&Edit')
         
         search = wx.Menu()
@@ -124,7 +124,7 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'New Document', self.on_new, 'page.png')
         util.tool_item(self, toolbar, 'Open Document', self.on_open, 'folder_page.png')
         util.tool_item(self, toolbar, 'Save Document', self.on_save, 'disk.png')
-        util.tool_item(self, toolbar, 'Save All Documents', self.on_event, 'disk_multiple.png')
+        util.tool_item(self, toolbar, 'Save All Documents', self.on_save_all, 'disk_multiple.png')
         toolbar.AddSeparator()
         util.tool_item(self, toolbar, 'Undo', self.on_undo, 'arrow_undo.png')
         util.tool_item(self, toolbar, 'Redo', self.on_redo, 'arrow_redo.png')
@@ -157,16 +157,22 @@ class Frame(wx.Frame):
                 self.notebook.create_tab(path)
     def on_save(self, event):
         tab = self.notebook.get_window()
-        if tab and not tab.save_file():
-            self.on_save_as(event)
+        if tab: self.save(tab)
+    def save(self, tab):
+        if not tab.save_file():
+            self.save_as(tab)
     def on_save_as(self, event):
         tab = self.notebook.get_window()
-        if not tab: return
+        if tab: self.save_as(tab)
+    def save_as(self, tab):
         dialog = wx.FileDialog(self, 'Save As', style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
         result = dialog.ShowModal()
         if result == wx.ID_OK:
             path = dialog.GetPath()
             tab.save_file(path)
+    def on_save_all(self, event):
+        for tab in self.notebook.get_windows():
+            self.save(tab)
     def on_cut(self, event):
         tab = self.notebook.get_window()
         if tab: tab.Cut()
@@ -188,6 +194,16 @@ class Frame(wx.Frame):
     def on_redo(self, event):
         tab = self.notebook.get_window()
         if tab: tab.Redo()
+    def on_lowercase(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.lower()
+    def on_uppercase(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.upper()
+    def on_close_tab(self, event):
+        self.notebook.close_tab()
+    def on_close_tabs(self, event):
+        self.notebook.close_tabs()
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):

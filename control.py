@@ -169,6 +169,12 @@ class EditorControl(stc.StyledTextCtrl):
             width = 0
         self.SetMarginType(self.LINE_MARGIN, stc.STC_MARGIN_NUMBER)
         self.SetMarginWidth(self.LINE_MARGIN, width)
+    def lower(self):
+        text = self.GetSelectedText()
+        self.ReplaceSelection(text.lower())
+    def upper(self):
+        text = self.GetSelectedText()
+        self.ReplaceSelection(text.upper())
     def on_key_down(self, event):
         code = event.GetKeyCode()
         if code == wx.WXK_F3 and settings.USE_SELECTION_FOR_F3: # find next
