@@ -54,14 +54,14 @@ class FileSettings(Settings):
         self.load()
     def load(self):
         try:
-            input = open(self._file, 'r')
+            input = open(self._file, 'rb')
             self._settings = pickle.load(input)
             input.close()
         except:
             self._settings = {}
     def save(self):
-        output = open(self._file, 'w')
-        pickle.dump(self._settings, output)
+        output = open(self._file, 'wb')
+        pickle.dump(self._settings, output, -1)
         output.close()
     def get(self, name):
         if name in self._settings:

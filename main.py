@@ -20,10 +20,17 @@ class Frame(wx.Frame):
         self.create_toolbars()
         manager.Update()
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetSize((1000, 1100))
         self.SetIcon(wx.IconFromBitmap(util.get_icon('page_edit.png')))
         self.notebook.load_state()
         self.load_state()
+    def set_default_size(self):
+        w = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
+        h = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)
+        wr, hr = 1, 1
+        pad = min(w/8, h/8)
+        n = min((w-pad)/wr, (h-pad)/hr)
+        size = (n*wr, n*hr)
+        self.SetSize(size)
     def save_state(self):
         if settings.MAIN_WINDOW_PERSISTED:
             if self.IsMaximized():
@@ -34,6 +41,8 @@ class Frame(wx.Frame):
                 settings.MAIN_WINDOW_POSITION = self.GetPosition()
     def load_state(self):
         if settings.MAIN_WINDOW_PERSISTED:
+            self.set_default_size()
+            self.Centre()
             self.SetSize(settings.MAIN_WINDOW_SIZE)
             self.SetPosition(settings.MAIN_WINDOW_POSITION)
             self.Maximize(settings.MAIN_WINDOW_MAXIMIZED)
@@ -201,8 +210,6 @@ class Frame(wx.Frame):
         print 'Unhandled event!'
         
 def run():
-    #import psyco
-    #psyco.full()
     app = wx.PySimpleApp()
     frame = Frame()
     frame.Show()
