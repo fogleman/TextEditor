@@ -84,6 +84,17 @@ class Frame(wx.Frame):
         file.AppendSeparator()
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
         file.AppendSeparator()
+        recent_files = self.get_recent_files()
+        if recent_files:
+            util.menu_item(self, file, 'Open All Recent Documents', self.on_open_all_recent, 'folder_star.png')
+            for path in recent_files:
+                item = util.menu_item(self, file, path, self.on_open_recent, 'blank.png')
+                item.SetHelp(path)
+            file.AppendSeparator()
+        util.menu_item(self, file, '&Exit\tAlt+F4', self.on_exit, 'door_out.png')
+        return file
+    def get_recent_files(self):
+        result = []
         if hasattr(self, 'notebook'):
             open_files = set(self.notebook.get_open_files())
             recent_files = set(settings.RECENT_FILES)
@@ -93,14 +104,11 @@ class Frame(wx.Frame):
                 for path in settings.RECENT_FILES:
                     if path not in displayed_files:
                         continue
-                    item = util.menu_item(self, file, path, self.on_open_recent, 'blank.png')
-                    item.SetHelp(path)
+                    result.append(path)
                     count += 1
                     if count >= settings.RECENT_FILES_DISPLAY:
                         break
-                file.AppendSeparator()
-        util.menu_item(self, file, '&Exit\tAlt+F4', self.on_exit, 'door_out.png')
-        return file
+        return result
     def create_menu(self):
         menubar = wx.MenuBar()
         
@@ -184,6 +192,10 @@ class Frame(wx.Frame):
     def open(self, path):
         self.notebook.create_tab(path)
         self.rebuild_file_menu()
+    def on_open_all_recent(self, event):
+        paths = self.get_recent_files()
+        for path in paths:
+            self.open(path)
     def on_open_recent(self, event):
         item = self.GetMenuBar().FindItemById(event.GetId())
         path = item.GetHelp()
