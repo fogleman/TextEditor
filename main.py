@@ -61,7 +61,7 @@ class Frame(wx.Frame):
         info.RightDockable(False)
         info.PaneBorder(False)
         info.Top()
-        toolbar = self.create_toolbar()
+        toolbar = self.create_main_toolbar()
         self.manager.AddPane(toolbar, info)
     def create_menu(self):
         menubar = wx.MenuBar()
@@ -69,14 +69,14 @@ class Frame(wx.Frame):
         util.menu_item(self, file, '&New\tCtrl+N', self.on_new, 'page.png')
         util.menu_item(self, file, '&Open...\tCtrl+O', self.on_open, 'folder_page.png')
         util.menu_item(self, file, '&Save\tCtrl+S', self.on_save, 'disk.png')
-        util.menu_item(self, file, '&Save As...\tCtrl+Shift+S', self.on_save_as, 'disk.png')
+        util.menu_item(self, file, '&Save As...\tCtrl+Shift+S', self.on_save_as, 'blank.png')
         util.menu_item(self, file, 'Save All', self.on_save_all, 'disk_multiple.png')
         file.AppendSeparator()
-        util.menu_item(self, file, 'Close\tCtrl+F4', self.on_close_tab, 'folder_delete.png')
-        util.menu_item(self, file, 'Close All\tCtrl+Shift+F4', self.on_close_tabs, 'folder_delete.png')
+        util.menu_item(self, file, 'Close\tCtrl+F4', self.on_close_tab, 'page_delete.png')
+        util.menu_item(self, file, 'Close All\tCtrl+Shift+F4', self.on_close_tabs, 'blank.png')
         file.AppendSeparator()
-        util.menu_item(self, file, 'Reload', self.on_event, 'drive_go.png')
-        util.menu_item(self, file, 'Rename...', self.on_event, 'page_go.png')
+        util.menu_item(self, file, 'Reload', self.on_event, 'arrow_refresh_small.png')
+        util.menu_item(self, file, 'Rename...', self.on_event, 'drive_edit.png')
         util.menu_item(self, file, 'Delete From Disk', self.on_event, 'cross.png')
         file.AppendSeparator()
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
@@ -120,7 +120,7 @@ class Frame(wx.Frame):
         menubar.Append(help, '&Help')
         
         self.SetMenuBar(menubar)
-    def create_toolbar(self):
+    def create_main_toolbar(self):
         toolbar = wx.ToolBar(self, -1, style=wx.TB_HORIZONTAL|wx.TB_FLAT|wx.TB_NODIVIDER)
         toolbar.SetToolBitmapSize((18,18))
         util.tool_item(self, toolbar, 'New Document', self.on_new, 'page.png')
