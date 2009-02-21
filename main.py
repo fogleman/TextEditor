@@ -63,8 +63,7 @@ class Frame(wx.Frame):
         info.Top()
         toolbar = self.create_main_toolbar()
         self.manager.AddPane(toolbar, info)
-    def create_menu(self):
-        menubar = wx.MenuBar()
+    def create_file_menu(self):
         file = wx.Menu()
         util.menu_item(self, file, '&New\tCtrl+N', self.on_new, 'page.png')
         util.menu_item(self, file, '&Open...\tCtrl+O', self.on_open, 'folder_page.png')
@@ -82,6 +81,11 @@ class Frame(wx.Frame):
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
         file.AppendSeparator()
         util.menu_item(self, file, '&Exit\tAlt+F4', self.on_exit, 'door_out.png')
+        return file
+    def create_menu(self):
+        menubar = wx.MenuBar()
+        
+        file = self.create_file_menu()
         menubar.Append(file, '&File')
         
         edit = wx.Menu()
@@ -127,6 +131,7 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Open Document', self.on_open, 'folder_page.png')
         util.tool_item(self, toolbar, 'Save Document', self.on_save, 'disk.png')
         util.tool_item(self, toolbar, 'Save All Documents', self.on_save_all, 'disk_multiple.png')
+        util.tool_item(self, toolbar, 'Close Document', self.on_close_tab, 'page_delete.png')
         toolbar.AddSeparator()
         util.tool_item(self, toolbar, 'Undo', self.on_undo, 'arrow_undo.png')
         util.tool_item(self, toolbar, 'Redo', self.on_redo, 'arrow_redo.png')
