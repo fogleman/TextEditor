@@ -54,7 +54,6 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_updateui)
         self.Bind(stc.EVT_STC_CHARADDED, self.on_charadded)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
-        self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
     def get_edited(self):
         return self._edited
     def set_edited(self, edited):
@@ -195,19 +194,16 @@ class EditorControl(stc.StyledTextCtrl):
     def upper(self):
         text = self.GetSelectedText()
         self.ReplaceSelection(text.upper())
-    def on_key_down(self, event):
-        code = event.GetKeyCode()
-        if code == wx.WXK_F3 and settings.USE_SELECTION_FOR_F3: # find next
-            # TODO: EnsureVisible when Folding
-            text = self.GetSelectedText()
-            if text:
-                start, end = self.GetSelection()
-                for index in (end, 0):
-                    index = self.FindText(index, self.GetLength(), text, 0)
-                    if index >= 0:
-                        self.SetSelection(index, index + len(text))
-                        break
-        event.Skip()
+    def find_next(self, text=None):
+        if settings.USE_SELECTION_FOR_F3:
+            text = self.GetSelectedText() or text
+        if text:
+            start, end = self.GetSelection()
+            for index in (end, 0):
+                index = self.FindText(index, self.GetLength(), text, 0)
+                if index >= 0:
+                    self.SetSelection(index, index + len(text))
+                    break
     def highlight_selection(self):
         self.IndicatorSetStyle(2, stc.STC_INDIC_ROUNDBOX)
         self.IndicatorSetForeground(2, wx.RED)

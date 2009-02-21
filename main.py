@@ -101,7 +101,7 @@ class Frame(wx.Frame):
         
         search = wx.Menu()
         util.menu_item(self, search, 'Find...\tCtrl+F', self.on_event, 'find.png')
-        util.menu_item(self, search, 'Find Next\tF3', self.on_event, 'page_white_put.png')
+        util.menu_item(self, search, 'Find Next\tF3', self.on_find_next, 'page_white_put.png')
         util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_event, 'page_white_get.png')
         util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
         util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_event, 'text_replace.png')
@@ -210,6 +210,9 @@ class Frame(wx.Frame):
         self.notebook.next_tab()
     def on_previous_tab(self, event):
         self.notebook.previous_tab()
+    def on_find_next(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.find_next() # TODO: pass search token
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):
