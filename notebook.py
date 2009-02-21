@@ -69,6 +69,16 @@ class Notebook(aui.AuiNotebook):
         n = self.GetPageCount()
         for i in range(n):
             self.close_tab(0)
+    def next_tab(self):
+        n = self.GetPageCount()
+        if n < 2: return
+        i = self.GetSelection()
+        self.SetSelection((i+1)%n)
+    def previous_tab(self):
+        n = self.GetPageCount()
+        if n < 2: return
+        i = self.GetSelection()
+        self.SetSelection((i+n-1)%n)
     def get_window(self, index=None):
         if index is None: index = self.GetSelection()
         return self.GetPage(index) if index >= 0 else None

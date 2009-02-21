@@ -109,6 +109,8 @@ class Frame(wx.Frame):
         menubar.Append(search, '&Search')
         
         view = wx.Menu()
+        util.menu_item(self, view, 'Next Tab\tCtrl+Tab', self.on_next_tab, 'arrow_right.png')
+        util.menu_item(self, view, 'Previous Tab\tCtrl+Shift+Tab', self.on_previous_tab, 'arrow_left.png')
         menubar.Append(view, '&View')
         
         tools = wx.Menu()
@@ -204,6 +206,10 @@ class Frame(wx.Frame):
         self.notebook.close_tab()
     def on_close_tabs(self, event):
         self.notebook.close_tabs()
+    def on_next_tab(self, event):
+        self.notebook.next_tab()
+    def on_previous_tab(self, event):
+        self.notebook.previous_tab()
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):
