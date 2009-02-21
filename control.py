@@ -31,6 +31,14 @@ EXTENSIONS = {
 '.xml': 'xml',
 }
 
+class EditorEvent(wx.PyEvent):
+    def __init__(self, type, object=None):
+        super(EditorEvent, self).__init__()
+        self.SetEventType(type.typeId)
+        self.SetEventObject(object)
+        
+EVT_EDITOR_STATUS_CHANGED = wx.PyEventBinder(wx.NewEventType())
+
 class EditorControl(stc.StyledTextCtrl):
     LINE_MARGIN = 0
     BOOKMARK_MARGIN = 1
@@ -38,7 +46,7 @@ class EditorControl(stc.StyledTextCtrl):
     def __init__(self, *args, **kwargs):
         super(EditorControl, self).__init__(*args, **kwargs)
         self.file_path = None
-        self.edited = False
+        self._edited = False
         self.apply_settings()
         self.SetEOLMode(stc.STC_EOL_LF)
         self.SetModEventMask(stc.STC_MOD_INSERTTEXT | stc.STC_MOD_DELETETEXT | stc.STC_PERFORMED_USER | stc.STC_PERFORMED_UNDO | stc.STC_PERFORMED_REDO)
@@ -47,6 +55,13 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_CHARADDED, self.on_charadded)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
+    def get_edited(self):
+        return self._edited
+    def set_edited(self, edited):
+        if self._edited != edited:
+            self._edited = edited
+            wx.PostEvent(self, EditorEvent(EVT_EDITOR_STATUS_CHANGED, self))
+    edited = property(get_edited, set_edited)
     def apply_settings(self):
         self.SetUseHorizontalScrollBar(settings.USE_HORIZONTAL_SCROLL_BAR)
         self.SetBackSpaceUnIndents(settings.BACKSPACE_UNINDENTS)
@@ -116,6 +131,7 @@ class EditorControl(stc.StyledTextCtrl):
             text = file.read()
             self.SetText(text)
             self.EmptyUndoBuffer()
+            self.edited = False
             self.file_path = path
             self.detect_language()
         except IOError:
@@ -133,12 +149,16 @@ class EditorControl(stc.StyledTextCtrl):
             file = open(path, 'w')
             text = self.GetText()
             file.write(text)
+            self.edited = False
             self.file_path = path
             return True
         finally:
             if file:
                 file.close()
         return False
+    def reload_file(self):
+        if self.file_path:
+            self.open_file(self.file_path)
     def detect_language(self):
         path = self.file_path
         if path:
@@ -215,7 +235,7 @@ class EditorControl(stc.StyledTextCtrl):
             self.MarkerSetBackground(marker, '#EEEEEE')
             self.MarkerAdd(line, marker)
     def on_change(self, event):
-        pass
+        self.edited = True
     def on_charadded(self, event):
         code = event.GetKey()
         if code == ord('\n'): # auto indent

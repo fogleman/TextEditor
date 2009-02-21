@@ -17,6 +17,15 @@ class Notebook(aui.AuiNotebook):
         if control.TabHitTest(x, y, None):
             if settings.CLOSE_TAB_ON_DOUBLE_CLICK:
                 self.close_tab()
+    def on_status_changed(self, event):
+        tab = event.GetEventObject()
+        if tab.edited:
+            icon = 'page_red.png'
+        else:
+            icon = 'page.png'
+        index = self.GetPageIndex(tab)
+        if index >= 0:
+            self.SetPageBitmap(index, util.get_icon(icon))
     def bind_tab_control(self):
         if hasattr(self, '_bound'): return
         for child in self.GetChildren():
@@ -44,6 +53,7 @@ class Notebook(aui.AuiNotebook):
         if path:
             widget.open_file(path)
             pre, name = os.path.split(path)
+        widget.Bind(control.EVT_EDITOR_STATUS_CHANGED, self.on_status_changed)
         self.AddPage(widget, name, True, util.get_icon('page.png'))
         widget.SetFocus()
         self.bind_tab_control()

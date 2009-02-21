@@ -48,4 +48,5 @@ break     except   import  print
 class     exec     in      raise
 continue  finally  is      return
 def       for      lambda  try
+False     True     None
 '''
