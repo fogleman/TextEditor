@@ -21,8 +21,9 @@ class Frame(wx.Frame):
         manager.Update()
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.SetIcon(wx.IconFromBitmap(util.get_icon('page_edit.png')))
-        self.notebook.load_state()
         self.load_state()
+        self.notebook.load_state()
+        self.rebuild_file_menu()
     def set_default_size(self):
         w = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
         h = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)
@@ -50,6 +51,7 @@ class Frame(wx.Frame):
         tabs = notebook.Notebook(self)
         self.notebook = tabs
         tabs.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
+        tabs.Bind(notebook.EVT_NOTEBOOK_TAB_CLOSED, self.on_tab_closed)
         info = aui.AuiPaneInfo()
         info.CentrePane()
         info.PaneBorder(False)
@@ -63,6 +65,8 @@ class Frame(wx.Frame):
         info.Top()
         toolbar = self.create_main_toolbar()
         self.manager.AddPane(toolbar, info)
+    def rebuild_file_menu(self):
+        self.GetMenuBar().Replace(0, self.create_file_menu(), '&File')
     def create_file_menu(self):
         file = wx.Menu()
         util.menu_item(self, file, '&New\tCtrl+N', self.on_new, 'page.png')
@@ -80,6 +84,21 @@ class Frame(wx.Frame):
         file.AppendSeparator()
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
         file.AppendSeparator()
+        if hasattr(self, 'notebook'):
+            open_files = set(self.notebook.get_open_files())
+            recent_files = set(settings.RECENT_FILES)
+            displayed_files = recent_files - open_files
+            if displayed_files:
+                count = 0
+                for path in settings.RECENT_FILES:
+                    if path not in displayed_files:
+                        continue
+                    item = util.menu_item(self, file, path, self.on_open_recent, 'blank.png')
+                    item.SetHelp(path)
+                    count += 1
+                    if count >= settings.RECENT_FILES_DISPLAY:
+                        break
+                file.AppendSeparator()
         util.menu_item(self, file, '&Exit\tAlt+F4', self.on_exit, 'door_out.png')
         return file
     def create_menu(self):
@@ -161,7 +180,14 @@ class Frame(wx.Frame):
         if result == wx.ID_OK:
             paths = dialog.GetPaths()
             for path in paths:
-                self.notebook.create_tab(path)
+                self.open(path)
+    def open(self, path):
+        self.notebook.create_tab(path)
+        self.rebuild_file_menu()
+    def on_open_recent(self, event):
+        item = self.GetMenuBar().FindItemById(event.GetId())
+        path = item.GetHelp()
+        self.open(path)
     def on_save(self, event):
         tab = self.notebook.get_window()
         if tab: self.save(tab)
@@ -224,18 +250,14 @@ class Frame(wx.Frame):
         event.Skip()
         self.save_state()
         self.notebook.save_state()
+    def on_tab_closed(self, event):
+        event.Skip()
+        self.rebuild_file_menu()
     def on_tab_changed(self, event):
         event.Skip()
         title = self.notebook.get_title()
         title = '%s - %s' % (title, APP_NAME) if title else APP_NAME
         self.SetTitle(title)
-    def on_tab_edited(self, event):
-        event.Skip()
-        notebook = self.notebook
-        widget = event.GetEventObject()
-        index = notebook.GetPageIndex(widget)
-        if index == wx.NOT_FOUND: return
-        notebook.SetPageBitmap(index, util.get_icon('page_red.png'))
     def on_event(self, event):
         print 'Unhandled event!'
         

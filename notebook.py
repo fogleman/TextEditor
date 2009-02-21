@@ -6,11 +6,24 @@ import control
 import util
 from settings import settings
 
+class NotebookEvent(wx.PyEvent):
+    def __init__(self, type, object=None):
+        super(NotebookEvent, self).__init__()
+        self.SetEventType(type.typeId)
+        self.SetEventObject(object)
+        
+EVT_NOTEBOOK_TAB_CLOSED = wx.PyEventBinder(wx.NewEventType())
+
 class Notebook(aui.AuiNotebook):
     def __init__(self, parent):
         style = wx.BORDER_NONE | aui.AUI_NB_CLOSE_BUTTON | aui.AUI_NB_TAB_MOVE | aui.AUI_NB_SCROLL_BUTTONS | aui.AUI_NB_WINDOWLIST_BUTTON
         super(Notebook, self).__init__(parent, -1, style=style)
         self.SetUniformBitmapSize((21, 21))
+        self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_page_close)
+    def on_page_close(self, event):
+        event.Veto()
+        index = event.GetSelection()
+        self.close_tab(index)
     def on_left_dclick(self, event):
         x, y = event.GetPosition()
         control = event.GetEventObject()
@@ -32,9 +45,12 @@ class Notebook(aui.AuiNotebook):
             if isinstance(child, aui.AuiTabCtrl):
                 child.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
                 self._bound = True
-    def save_state(self):
+    def get_open_files(self):
         files = [window.file_path for window in self.get_windows()]
         files = [file for file in files if file]
+        return files
+    def save_state(self):
+        files = self.get_open_files()
         settings.OPEN_FILES = files if settings.REMEMBER_OPEN_FILES else []
     def load_state(self):
         if settings.OPEN_FILES:
@@ -42,6 +58,15 @@ class Notebook(aui.AuiNotebook):
                 self.create_tab(file)
         else:
             self.create_tab()
+    def recent_path(self, path):
+        if not path: return
+        files = list(settings.RECENT_FILES)
+        if path in files:
+            files.remove(path)
+        files.insert(0, path)
+        if len(files) > settings.RECENT_FILES_SIZE:
+            files = files[:settings.RECENT_FILES_SIZE]
+        settings.RECENT_FILES = files
     def create_tab(self, path=None):
         if path:
             for window in self.get_windows():
@@ -57,13 +82,16 @@ class Notebook(aui.AuiNotebook):
         self.AddPage(widget, name, True, util.get_icon('page.png'))
         widget.SetFocus()
         self.bind_tab_control()
+        self.recent_path(path)
     def close_tab(self, index=None):
         if index is None: index = self.GetSelection()
         if index >= 0:
             window = self.get_window(index)
-            self.RemovePage(index)
-            window.Destroy()
+            self.recent_path(window.file_path)
+            self.DeletePage(index)
+            wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))
         if self.GetPageCount() == 0:
+            del self._bound
             self.create_tab()
     def close_tabs(self):
         n = self.GetPageCount()
