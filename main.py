@@ -185,6 +185,10 @@ class Frame(wx.Frame):
         self.notebook.create_tab()
     def on_open(self, event):
         dialog = wx.FileDialog(self, 'Open', style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST|wx.FD_MULTIPLE)
+        tab = self.notebook.get_window()
+        if tab and tab.file_path and settings.SET_DIRECTORY_FOR_OPEN:
+            directory, file = os.path.split(tab.file_path)
+            dialog.SetDirectory(directory)
         result = dialog.ShowModal()
         if result == wx.ID_OK:
             paths = dialog.GetPaths()
