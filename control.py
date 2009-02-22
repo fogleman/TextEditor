@@ -75,6 +75,8 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetCaretWidth(settings.CARET_WIDTH)
         
         self.SetWrapMode(stc.STC_WRAP_WORD if settings.WORD_WRAP else stc.STC_WRAP_NONE)
+        self.SetSelBackground(bool(settings.SELECTION_BACKGROUND), settings.SELECTION_BACKGROUND)
+        self.SetSelForeground(bool(settings.SELECTION_FOREGROUND), settings.SELECTION_FOREGROUND)
         self.SetUseHorizontalScrollBar(settings.USE_HORIZONTAL_SCROLL_BAR)
         self.SetBackSpaceUnIndents(settings.BACKSPACE_UNINDENTS)
         self.SetEdgeColumn(settings.EDGE_COLUMN)
@@ -244,13 +246,15 @@ class EditorControl(stc.StyledTextCtrl):
         text = self.GetSelectedText()
         if not text or '\n' in text:
             return
+        start = self.GetSelectionStart()
         index = -1
         n = len(text)
         while True:
             index = self.FindText(index, self.GetLength(), text, stc.STC_FIND_WHOLEWORD|stc.STC_FIND_MATCHCASE)
             if index < 0: break
-            self.StartStyling(index, stc.STC_INDIC2_MASK)
-            self.SetStyling(n, stc.STC_INDIC2_MASK)
+            if index != start:
+                self.StartStyling(index, stc.STC_INDIC2_MASK)
+                self.SetStyling(n, stc.STC_INDIC2_MASK)
             index += 1
     def on_change(self, event):
         self.edited = True

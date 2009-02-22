@@ -86,7 +86,7 @@ class Frame(wx.Frame):
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
         file.AppendSeparator()
         recent_files = self.get_recent_files()
-        if recent_files:
+        if recent_files and settings.SHOW_RECENT_FILES:
             for path in recent_files:
                 text = util.abbreviate(path, 60)
                 item = util.menu_item(self, file, text, self.on_open_recent, 'blank.png')
