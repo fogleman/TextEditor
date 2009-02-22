@@ -14,6 +14,15 @@ class NotebookEvent(wx.PyEvent):
         
 EVT_NOTEBOOK_TAB_CLOSED = wx.PyEventBinder(wx.NewEventType())
 
+class DropTarget(wx.FileDropTarget):
+    def __init__(self, notebook):
+        super(DropTarget, self).__init__()
+        self.notebook = notebook
+    def OnDropFiles(self, x, y, paths):
+        for path in paths:
+            self.notebook.create_tab(path)
+        return True
+        
 class Notebook(aui.AuiNotebook):
     def __init__(self, parent):
         style = wx.BORDER_NONE
@@ -30,6 +39,7 @@ class Notebook(aui.AuiNotebook):
             
         super(Notebook, self).__init__(parent, -1, style=style)
         self._tab_controls = set()
+        self.SetDropTarget(DropTarget(self))
         self.SetUniformBitmapSize((21, 21))
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_page_close)
         self.Bind(aui.EVT_AUINOTEBOOK_DRAG_DONE, self.on_drag_done)
@@ -109,6 +119,7 @@ class Notebook(aui.AuiNotebook):
         if path:
             self.close_untitled_tab()
         widget = control.EditorControl(self, -1, style=wx.BORDER_NONE)
+        widget.SetDropTarget(DropTarget(self))
         if path:
             widget.open_file(path)
         widget.Bind(control.EVT_EDITOR_STATUS_CHANGED, self.on_status_changed)

@@ -177,7 +177,7 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Copy', self.on_copy, 'page_copy.png')
         util.tool_item(self, toolbar, 'Paste', self.on_paste, 'paste_plain.png')
         toolbar.AddSeparator()
-        util.tool_item(self, toolbar, 'Find...', self.on_event, 'find.png')
+        util.tool_item(self, toolbar, 'Find', self.on_event, 'find.png')
         #util.tool_item(self, toolbar, 'Find Next', self.on_event, 'page_white_put.png')
         #util.tool_item(self, toolbar, 'Find Previous', self.on_event, 'page_white_get.png')
         util.tool_item(self, toolbar, 'Find In Files', self.on_event, 'magnifier.png')
