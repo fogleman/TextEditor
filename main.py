@@ -78,18 +78,21 @@ class Frame(wx.Frame):
         util.menu_item(self, file, 'Close\tCtrl+F4', self.on_close_tab, 'page_delete.png')
         util.menu_item(self, file, 'Close All\tCtrl+Shift+F4', self.on_close_tabs, 'blank.png')
         file.AppendSeparator()
-        util.menu_item(self, file, 'Reload', self.on_event, 'arrow_refresh_small.png')
-        util.menu_item(self, file, 'Rename...', self.on_event, 'drive_edit.png')
-        util.menu_item(self, file, 'Delete From Disk', self.on_event, 'cross.png')
-        file.AppendSeparator()
+        #util.menu_item(self, file, 'Reload', self.on_event, 'arrow_refresh_small.png')
+        #util.menu_item(self, file, 'Rename...', self.on_event, 'drive_edit.png')
+        #util.menu_item(self, file, 'Delete From Disk', self.on_event, 'cross.png')
+        #file.AppendSeparator()
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
         file.AppendSeparator()
         recent_files = self.get_recent_files()
         if recent_files:
-            util.menu_item(self, file, 'Open All Recent Documents', self.on_open_all_recent, 'folder_star.png')
             for path in recent_files:
-                item = util.menu_item(self, file, path, self.on_open_recent, 'blank.png')
+                text = util.abbreviate(path, 60)
+                item = util.menu_item(self, file, text, self.on_open_recent, 'blank.png')
                 item.SetHelp(path)
+            file.AppendSeparator()
+            util.menu_item(self, file, 'Open All Recent Documents', self.on_open_all_recent, 'folder_star.png')
+            util.menu_item(self, file, 'Clear Recent Documents', self.on_clear_recent, 'blank.png')
             file.AppendSeparator()
         util.menu_item(self, file, '&Exit\tAlt+F4', self.on_exit, 'door_out.png')
         return file
@@ -201,6 +204,9 @@ class Frame(wx.Frame):
         paths = self.get_recent_files()
         for path in paths:
             self.open(path)
+    def on_clear_recent(self, event):
+        settings.RECENT_FILES = []
+        self.rebuild_file_menu()
     def on_open_recent(self, event):
         item = self.GetMenuBar().FindItemById(event.GetId())
         path = item.GetHelp()

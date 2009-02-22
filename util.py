@@ -32,3 +32,12 @@ def tool_item(window, toolbar, label, func, icon):
         window.Bind(wx.EVT_TOOL, func, id=item.GetId())
     return item
     
+def abbreviate(text, length):
+    n = len(text)
+    if n <= length:
+        return text
+    half = (length - 3) / 2
+    pre = text[:half]
+    post = text[-half:]
+    return '%s...%s' % (pre, post)
+    
