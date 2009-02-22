@@ -30,6 +30,8 @@ class Notebook(aui.AuiNotebook):
         if control.TabHitTest(x, y, None):
             if settings.CLOSE_TAB_ON_DOUBLE_CLICK:
                 self.close_tab()
+        else:
+            self.create_tab()
     def on_status_changed(self, event):
         tab = event.GetEventObject()
         if tab.edited:
@@ -67,12 +69,21 @@ class Notebook(aui.AuiNotebook):
         if len(files) > settings.RECENT_FILES_SIZE:
             files = files[:settings.RECENT_FILES_SIZE]
         settings.RECENT_FILES = files
+    def close_untitled_tab(self):
+        windows = self.get_windows()
+        if len(windows) == 1:
+            window = windows[0]
+            if not window.file_path and not window.edited and not window.GetText():
+                self.close_tab(create_untitled=False)
     def create_tab(self, path=None):
         if path:
             for window in self.get_windows():
                 if window.file_path == path:
                     window.SetFocus()
                     return
+        self.Freeze()
+        if path:
+            self.close_untitled_tab()
         widget = control.EditorControl(self, -1, style=wx.BORDER_NONE)
         name = '(Untitled)'
         if path:
@@ -83,7 +94,9 @@ class Notebook(aui.AuiNotebook):
         widget.SetFocus()
         self.bind_tab_control()
         self.recent_path(path)
-    def close_tab(self, index=None):
+        self.Thaw()
+    def close_tab(self, index=None, create_untitled=True):
+        self.Freeze()
         if index is None: index = self.GetSelection()
         if index >= 0:
             window = self.get_window(index)
@@ -92,7 +105,9 @@ class Notebook(aui.AuiNotebook):
             wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))
         if self.GetPageCount() == 0:
             del self._bound
-            self.create_tab()
+            if create_untitled:
+                self.create_tab()
+        self.Thaw()
     def close_tabs(self):
         n = self.GetPageCount()
         for i in range(n):

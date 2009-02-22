@@ -62,6 +62,12 @@ class EditorControl(stc.StyledTextCtrl):
             wx.PostEvent(self, EditorEvent(EVT_EDITOR_STATUS_CHANGED, self))
     edited = property(get_edited, set_edited)
     def apply_settings(self):
+        self.SetCaretForeground(settings.CARET_FOREGROUND)
+        self.SetCaretLineVisible(settings.CARET_LINE_VISIBLE)
+        self.SetCaretLineBack(settings.CARET_LINE_BACKGROUND)
+        self.SetCaretPeriod(settings.CARET_PERIOD)
+        self.SetCaretWidth(settings.CARET_WIDTH)
+        
         self.SetUseHorizontalScrollBar(settings.USE_HORIZONTAL_SCROLL_BAR)
         self.SetBackSpaceUnIndents(settings.BACKSPACE_UNINDENTS)
         self.SetEdgeColumn(settings.EDGE_COLUMN)
@@ -227,14 +233,6 @@ class EditorControl(stc.StyledTextCtrl):
             self.StartStyling(index, stc.STC_INDIC2_MASK)
             self.SetStyling(n, stc.STC_INDIC2_MASK)
             index += 1
-    def highlight_line(self):
-        marker = 0
-        self.MarkerDeleteAll(marker)
-        if settings.HIGHLIGHT_LINE:
-            line = self.GetCurrentLine()
-            self.MarkerDefine(marker, stc.STC_MARK_BACKGROUND)
-            self.MarkerSetBackground(marker, '#EEEEEE')
-            self.MarkerAdd(line, marker)
     def on_change(self, event):
         self.edited = True
     def on_charadded(self, event):
@@ -278,7 +276,6 @@ class EditorControl(stc.StyledTextCtrl):
         self.match_brace()
         self.show_line_numbers()
         self.highlight_selection()
-        self.highlight_line()
         
 if __name__ == '__main__':
     app = wx.PySimpleApp()
