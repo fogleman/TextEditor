@@ -47,7 +47,8 @@ class Notebook(aui.AuiNotebook):
             if settings.CLOSE_TAB_ON_DOUBLE_CLICK:
                 self.close_tab()
         else:
-            self.create_tab()
+            if settings.CREATE_TAB_ON_DOUBLE_CLICK:
+                self.create_tab()
     def on_status_changed(self, event):
         tab = event.GetEventObject()
         if tab.edited:
