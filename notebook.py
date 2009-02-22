@@ -16,10 +16,26 @@ EVT_NOTEBOOK_TAB_CLOSED = wx.PyEventBinder(wx.NewEventType())
 
 class Notebook(aui.AuiNotebook):
     def __init__(self, parent):
-        style = wx.BORDER_NONE | aui.AUI_NB_CLOSE_BUTTON | aui.AUI_NB_TAB_MOVE | aui.AUI_NB_SCROLL_BUTTONS | aui.AUI_NB_WINDOWLIST_BUTTON
+        style = wx.BORDER_NONE
+        style |= aui.AUI_NB_TAB_MOVE
+        style |= aui.AUI_NB_TAB_SPLIT
+        style |= settings.AUI_NB_CLOSE
+        style |= settings.AUI_NB_POSITION
+        if settings.AUI_NB_TAB_FIXED_WIDTH:
+            style |= aui.AUI_NB_TAB_FIXED_WIDTH
+        if settings.AUI_NB_SCROLL_BUTTONS:
+            style |= aui.AUI_NB_SCROLL_BUTTONS
+        if settings.AUI_NB_WINDOWLIST_BUTTON:
+            style |= aui.AUI_NB_WINDOWLIST_BUTTON
+            
         super(Notebook, self).__init__(parent, -1, style=style)
+        self._tab_controls = set()
         self.SetUniformBitmapSize((21, 21))
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_page_close)
+        self.Bind(aui.EVT_AUINOTEBOOK_DRAG_DONE, self.on_drag_done)
+    def on_drag_done(self, event):
+        event.Skip()
+        self.bind_tab_control()
     def on_page_close(self, event):
         event.Veto()
         index = event.GetSelection()
@@ -42,11 +58,12 @@ class Notebook(aui.AuiNotebook):
         if index >= 0:
             self.SetPageBitmap(index, util.get_icon(icon))
     def bind_tab_control(self):
-        if hasattr(self, '_bound'): return
         for child in self.GetChildren():
+            if child in self._tab_controls:
+                continue
             if isinstance(child, aui.AuiTabCtrl):
                 child.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
-                self._bound = True
+                self._tab_controls.add(child)
     def get_open_files(self):
         files = [window.file_path for window in self.get_windows()]
         files = [file for file in files if file]
@@ -107,7 +124,6 @@ class Notebook(aui.AuiNotebook):
             self.DeletePage(index)
             wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))
         if self.GetPageCount() == 0:
-            del self._bound
             if create_untitled:
                 self.create_tab()
         self.Thaw()

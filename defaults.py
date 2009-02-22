@@ -1,4 +1,5 @@
 import wx
+import wx.aui as aui
 import wx.stc as stc
 
 AUTO_INDENT = True
@@ -34,6 +35,12 @@ WORD_WRAP = False
 FONT_FACE = 'Bitstream Vera Sans Mono'
 FONT_SIZE = 10
 LANGUAGE = 'Python'
+
+AUI_NB_TAB_FIXED_WIDTH = False
+AUI_NB_SCROLL_BUTTONS = True
+AUI_NB_WINDOWLIST_BUTTON = True
+AUI_NB_CLOSE = aui.AUI_NB_CLOSE_BUTTON
+AUI_NB_POSITION = aui.AUI_NB_TOP
 
 MAIN_WINDOW_MAXIMIZED = False
 MAIN_WINDOW_PERSISTED = True
