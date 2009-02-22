@@ -67,6 +67,19 @@ class EditorControl(stc.StyledTextCtrl):
             self._edited = edited
             wx.PostEvent(self, EditorEvent(EVT_EDITOR_STATUS_CHANGED, self))
     edited = property(get_edited, set_edited)
+    def confirm_close(self, frame, can_veto=True):
+        if self.edited:
+            name = self.file_path or self.get_name()
+            style = wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION
+            if can_veto:
+                style |= wx.CANCEL
+            dialog = wx.MessageDialog(frame, 'Save changes to file "%s"?' % name, 'Save Changes?', style)
+            result = dialog.ShowModal()
+            if result == wx.ID_YES:
+                frame.save(self)
+            elif result == wx.ID_CANCEL:
+                return False
+        return True
     def apply_settings(self):
         self.SetCaretForeground(settings.CARET_FOREGROUND)
         self.SetCaretLineVisible(settings.CARET_LINE_VISIBLE)

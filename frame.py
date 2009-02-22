@@ -309,9 +309,19 @@ class Frame(wx.Frame):
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):
+        can_veto = event.CanVeto()
+        veto = not self.confirm_close(can_veto)
+        if veto and can_veto:
+            event.Veto()
+            return
         event.Skip()
         self.save_state()
         self.notebook.save_state()
+    def confirm_close(self, can_veto):
+        for tab in self.notebook.get_windows():
+            if not tab.confirm_close(self, can_veto):
+                return False
+        return True
     def on_tab_closed(self, event):
         event.Skip()
         self.rebuild_file_menu()
