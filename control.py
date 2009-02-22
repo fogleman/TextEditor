@@ -156,6 +156,8 @@ class EditorControl(stc.StyledTextCtrl):
         path = path or self.file_path
         if not path:
             return False
+        if not self.edited:
+            return True
         file = None
         try:
             file = open(path, 'w')
@@ -212,6 +214,10 @@ class EditorControl(stc.StyledTextCtrl):
         lines = text.split('\n')
         lines.sort()
         self.ReplaceSelection('\n'.join(lines))
+    def indent(self):
+        self.CmdKeyExecute(stc.STC_CMD_TAB)
+    def unindent(self):
+        self.CmdKeyExecute(stc.STC_CMD_BACKTAB)
     def word_wrap(self):
         mode = self.GetWrapMode()
         if mode == stc.STC_WRAP_WORD:

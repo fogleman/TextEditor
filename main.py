@@ -133,6 +133,9 @@ class Frame(wx.Frame):
         util.menu_item(self, edit, 'Sort', self.on_sort, 'arrow_down.png')
         util.menu_item(self, edit, 'Lowercase', self.on_lowercase, 'text_lowercase.png')
         util.menu_item(self, edit, 'Uppercase', self.on_uppercase, 'text_uppercase.png')
+        edit.AppendSeparator()
+        util.menu_item(self, edit, 'Indent', self.on_indent, 'text_indent.png')
+        util.menu_item(self, edit, 'Unindent', self.on_unindent, 'text_indent_remove.png')
         menubar.Append(edit, '&Edit')
         
         search = wx.Menu()
@@ -194,7 +197,7 @@ class Frame(wx.Frame):
         x, y = anchor.GetScreenPosition()
         w1, h1 = anchor.GetSize()
         w2, h2 = pane.GetSize()
-        px, py = 30, 10
+        px, py = 32, 8
         return (x+w1-w2-px, y+py)
     def on_goto_line(self, event):
         pane = find.GotoLine(self, self.notebook.get_window())
@@ -283,6 +286,12 @@ class Frame(wx.Frame):
     def on_uppercase(self, event):
         tab = self.notebook.get_window()
         if tab: tab.upper()
+    def on_indent(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.indent()
+    def on_unindent(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.unindent()
     def on_close_tab(self, event):
         self.notebook.close_tab()
     def on_close_tabs(self, event):

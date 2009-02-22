@@ -15,6 +15,7 @@ class GotoLine(wx.Panel):
         sizer.Add(input, 0, wx.EXPAND|wx.ALL&~wx.TOP, 5)
         self.SetSizerAndFit(sizer)
     def on_text_enter(self, event):
+        self.on_text(event)
         self.control.SetFocus()
     def on_text(self, event):
         value = event.GetEventObject().GetValue()
