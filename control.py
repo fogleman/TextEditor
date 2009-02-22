@@ -194,6 +194,11 @@ class EditorControl(stc.StyledTextCtrl):
     def upper(self):
         text = self.GetSelectedText()
         self.ReplaceSelection(text.upper())
+    def sort(self):
+        text = self.GetSelectedText()
+        lines = text.split('\n')
+        lines.sort()
+        self.ReplaceSelection('\n'.join(lines))
     def find_next(self, text=None):
         if settings.USE_SELECTION_FOR_F3:
             text = self.GetSelectedText() or text

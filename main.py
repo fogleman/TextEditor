@@ -126,6 +126,7 @@ class Frame(wx.Frame):
         edit.AppendSeparator()
         util.menu_item(self, edit, 'Select All\tCtrl+A', self.on_select_all, 'table_go.png')
         edit.AppendSeparator()
+        util.menu_item(self, edit, 'Sort', self.on_sort, 'arrow_down.png')
         util.menu_item(self, edit, 'Lowercase', self.on_lowercase, 'text_lowercase.png')
         util.menu_item(self, edit, 'Uppercase', self.on_uppercase, 'text_uppercase.png')
         menubar.Append(edit, '&Edit')
@@ -239,6 +240,9 @@ class Frame(wx.Frame):
     def on_redo(self, event):
         tab = self.notebook.get_window()
         if tab: tab.Redo()
+    def on_sort(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.sort()
     def on_lowercase(self, event):
         tab = self.notebook.get_window()
         if tab: tab.lower()
