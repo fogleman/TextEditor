@@ -68,7 +68,7 @@ class EditorControl(stc.StyledTextCtrl):
             wx.PostEvent(self, EditorEvent(EVT_EDITOR_STATUS_CHANGED, self))
     edited = property(get_edited, set_edited)
     def confirm_close(self, frame, can_veto=True):
-        if self.edited:
+        if self.edited and settings.CONFIRM_CLOSE_WITH_EDITS:
             name = self.file_path or self.get_name()
             style = wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION
             if can_veto:
@@ -180,10 +180,12 @@ class EditorControl(stc.StyledTextCtrl):
             file.write(text)
             self.edited = False
             self.file_path = path
+            self.detect_language()
             return True
         finally:
             if file:
                 file.close()
+            self.Colourise(0, self.GetLength())
         return False
     def reload_file(self):
         if self.file_path:
