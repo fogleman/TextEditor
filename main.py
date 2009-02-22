@@ -146,6 +146,8 @@ class Frame(wx.Frame):
         view = wx.Menu()
         util.menu_item(self, view, 'Next Tab\tCtrl+Tab', self.on_next_tab, 'arrow_right.png')
         util.menu_item(self, view, 'Previous Tab\tCtrl+Shift+Tab', self.on_previous_tab, 'arrow_left.png')
+        view.AppendSeparator()
+        util.menu_item(self, view, 'Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
         menubar.Append(view, '&View')
         
         tools = wx.Menu()
@@ -177,6 +179,8 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Find In Files', self.on_event, 'magnifier.png')
         util.tool_item(self, toolbar, 'Replace', self.on_event, 'text_replace.png')
         util.tool_item(self, toolbar, 'Goto Line', self.on_event, 'text_linespacing.png')
+        toolbar.AddSeparator()
+        util.tool_item(self, toolbar, 'Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
         
         toolbar.Realize()
         toolbar.Fit()
@@ -267,6 +271,9 @@ class Frame(wx.Frame):
         self.notebook.next_tab()
     def on_previous_tab(self, event):
         self.notebook.previous_tab()
+    def on_word_wrap(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.word_wrap()
     def on_find_next(self, event):
         tab = self.notebook.get_window()
         if tab: tab.find_next() # TODO: pass search token

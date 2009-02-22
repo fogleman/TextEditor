@@ -68,6 +68,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetCaretPeriod(settings.CARET_PERIOD)
         self.SetCaretWidth(settings.CARET_WIDTH)
         
+        self.SetWrapMode(stc.STC_WRAP_WORD if settings.WORD_WRAP else stc.STC_WRAP_NONE)
         self.SetUseHorizontalScrollBar(settings.USE_HORIZONTAL_SCROLL_BAR)
         self.SetBackSpaceUnIndents(settings.BACKSPACE_UNINDENTS)
         self.SetEdgeColumn(settings.EDGE_COLUMN)
@@ -205,6 +206,12 @@ class EditorControl(stc.StyledTextCtrl):
         lines = text.split('\n')
         lines.sort()
         self.ReplaceSelection('\n'.join(lines))
+    def word_wrap(self):
+        mode = self.GetWrapMode()
+        if mode == stc.STC_WRAP_WORD:
+            self.SetWrapMode(stc.STC_WRAP_NONE)
+        else:
+            self.SetWrapMode(stc.STC_WRAP_WORD)
     def find_next(self, text=None):
         if settings.USE_SELECTION_FOR_F3:
             text = self.GetSelectedText() or text
