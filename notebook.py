@@ -80,6 +80,7 @@ class Notebook(aui.AuiNotebook):
             for index in (settings.ACTIVE_TAB, 0):
                 if index >= 0 and index < self.GetPageCount():
                     self.SetSelection(index)
+                    self.get_window(index).SetFocus()
                     break
         else:
             self.create_tab()
@@ -124,9 +125,8 @@ class Notebook(aui.AuiNotebook):
             self.recent_path(window.file_path)
             self.DeletePage(index)
             wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))
-        if self.GetPageCount() == 0:
-            if create_untitled:
-                self.create_tab()
+        if self.GetPageCount() == 0 and create_untitled:
+            self.create_tab()
         self.Thaw()
     def close_tabs(self):
         n = self.GetPageCount()
