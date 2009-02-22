@@ -54,10 +54,15 @@ class Notebook(aui.AuiNotebook):
     def save_state(self):
         files = self.get_open_files()
         settings.OPEN_FILES = files if settings.REMEMBER_OPEN_FILES else []
+        settings.ACTIVE_TAB = self.GetSelection()
     def load_state(self):
         if settings.OPEN_FILES:
             for file in settings.OPEN_FILES:
                 self.create_tab(file)
+            for index in (settings.ACTIVE_TAB, 0):
+                if index >= 0 and index < self.GetPageCount():
+                    self.SetSelection(index)
+                    break
         else:
             self.create_tab()
     def recent_path(self, path):
@@ -85,12 +90,10 @@ class Notebook(aui.AuiNotebook):
         if path:
             self.close_untitled_tab()
         widget = control.EditorControl(self, -1, style=wx.BORDER_NONE)
-        name = '(Untitled)'
         if path:
             widget.open_file(path)
-            pre, name = os.path.split(path)
         widget.Bind(control.EVT_EDITOR_STATUS_CHANGED, self.on_status_changed)
-        self.AddPage(widget, name, True, util.get_icon('page.png'))
+        self.AddPage(widget, widget.get_name(), True, util.get_icon('page.png'))
         widget.SetFocus()
         self.bind_tab_control()
         self.recent_path(path)
@@ -131,6 +134,10 @@ class Notebook(aui.AuiNotebook):
     def get_tab_name(self, index=None):
         if index is None: index = self.GetSelection()
         return self.GetPageText(index) if index >= 0 else None
+    def update_tab_name(self, tab):
+        index = self.GetPageIndex(tab)
+        if index >= 0:
+            self.SetPageText(index, tab.get_name())
     def get_title(self):
         title = None
         if settings.FULL_PATH_IN_TITLE:

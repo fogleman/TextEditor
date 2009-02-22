@@ -54,6 +54,12 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_updateui)
         self.Bind(stc.EVT_STC_CHARADDED, self.on_charadded)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
+    def get_name(self):
+        if self.file_path:
+            pre, name = os.path.split(self.file_path)
+            return name
+        else:
+            return '(Untitled)'
     def get_edited(self):
         return self._edited
     def set_edited(self, edited):

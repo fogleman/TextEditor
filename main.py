@@ -5,6 +5,7 @@ import os
 import control
 import notebook
 import util
+import find
 from settings import settings
 
 APP_NAME = 'Text Editor'
@@ -140,7 +141,7 @@ class Frame(wx.Frame):
         util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_event, 'page_white_get.png')
         util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
         util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_event, 'text_replace.png')
-        util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_event, 'text_linespacing.png')
+        util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_goto_line, 'text_linespacing.png')
         menubar.Append(search, '&Search')
         
         view = wx.Menu()
@@ -188,6 +189,23 @@ class Frame(wx.Frame):
     def create_statusbar(self):
         statusbar = self.CreateStatusBar()
         self.statusbar = statusbar
+    def get_floating_position(self, pane):
+        anchor = self.notebook.get_window()
+        x, y = anchor.GetScreenPosition()
+        w1, h1 = anchor.GetSize()
+        w2, h2 = pane.GetSize()
+        px, py = 30, 10
+        return (x+w1-w2-px, y+py)
+    def on_goto_line(self, event):
+        pane = find.GotoLine(self, self.notebook.get_window())
+        info = aui.AuiPaneInfo()
+        info.DefaultPane()
+        info.Caption('Goto Line')
+        info.Float()
+        info.FloatingPosition(self.get_floating_position(pane))
+        self.manager.AddPane(pane, info)
+        self.manager.Update()
+        pane.SetFocus()
     def on_new(self, event):
         self.notebook.create_tab()
     def on_open(self, event):
@@ -230,6 +248,8 @@ class Frame(wx.Frame):
         if result == wx.ID_OK:
             path = dialog.GetPath()
             tab.save_file(path)
+            self.notebook.update_tab_name(tab)
+            self.update_title()
     def on_save_all(self, event):
         for tab in self.notebook.get_windows():
             self.save(tab)
@@ -288,6 +308,8 @@ class Frame(wx.Frame):
         self.rebuild_file_menu()
     def on_tab_changed(self, event):
         event.Skip()
+        self.update_title()
+    def update_title(self):
         title = self.notebook.get_title()
         title = '%s - %s' % (title, APP_NAME) if title else APP_NAME
         self.SetTitle(title)
