@@ -5,8 +5,7 @@ from settings import settings
 
 class Find(wx.Dialog):
     def __init__(self, parent):
-        style = wx.CAPTION | wx.RESIZE_BORDER | wx.CLOSE_BOX | wx.SYSTEM_MENU
-        super(Find, self).__init__(parent, -1, 'Find', style=style)
+        super(Find, self).__init__(parent, -1, 'Find')
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.create_controls(), 1, wx.EXPAND|wx.ALL, 5)
         sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL, 5)

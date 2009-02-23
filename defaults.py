@@ -2,6 +2,8 @@ import wx
 import wx.aui as aui
 import wx.stc as stc
 
+APP_NAME = 'Text Editor'
+
 AUTO_INDENT = True
 BACKSPACE_UNINDENTS = True
 BOOKMARKS = True

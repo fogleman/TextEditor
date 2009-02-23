@@ -6,12 +6,11 @@ import control
 import notebook
 import util
 import find
+import about
 from settings import settings
 
-APP_NAME = 'Text Editor'
-
 class Frame(wx.Frame):
-    def __init__(self, parent=None, title=APP_NAME):
+    def __init__(self, parent=None, title=settings.APP_NAME):
         super(Frame, self).__init__(parent, -1, title)
         manager = aui.AuiManager(self)
         self.manager = manager
@@ -151,13 +150,16 @@ class Frame(wx.Frame):
         util.menu_item(self, view, 'Next Tab\tCtrl+Tab', self.on_next_tab, 'arrow_right.png')
         util.menu_item(self, view, 'Previous Tab\tCtrl+Shift+Tab', self.on_previous_tab, 'arrow_left.png')
         view.AppendSeparator()
-        util.menu_item(self, view, 'Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
+        util.menu_item(self, view, 'Toggle Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
         menubar.Append(view, '&View')
         
         tools = wx.Menu()
+        util.menu_item(self, tools, 'Options...', self.on_event, 'cog.png')
+        util.menu_item(self, tools, 'Styles...', self.on_event, 'palette.png')
         menubar.Append(tools, '&Tools')
         
         help = wx.Menu()
+        util.menu_item(self, help, 'About %s...' % settings.APP_NAME, self.on_about, 'information.png')
         menubar.Append(help, '&Help')
         
         self.SetMenuBar(menubar)
@@ -184,7 +186,7 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Replace', self.on_event, 'text_replace.png')
         util.tool_item(self, toolbar, 'Goto Line', self.on_event, 'text_linespacing.png')
         toolbar.AddSeparator()
-        util.tool_item(self, toolbar, 'Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
+        util.tool_item(self, toolbar, 'Toggle Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
         
         toolbar.Realize()
         toolbar.Fit()
@@ -315,6 +317,9 @@ class Frame(wx.Frame):
     def on_find_previous(self, event):
         tab = self.notebook.get_window()
         if tab: tab.find(previous=True) # TODO: pass search token
+    def on_about(self, event):
+        dialog = about.About(self)
+        dialog.ShowModal()
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):
@@ -339,8 +344,9 @@ class Frame(wx.Frame):
         self.update_title()
     def update_title(self):
         title = self.notebook.get_title()
-        title = '%s - %s' % (title, APP_NAME) if title else APP_NAME
+        title = '%s - %s' % (title, settings.APP_NAME) if title else settings.APP_NAME
         self.SetTitle(title)
     def on_event(self, event):
-        print 'Unhandled event!'
+        dialog = wx.MessageDialog(self, 'This feature does not exist yet.', 'Lazy Programmer Error', wx.OK|wx.ICON_INFORMATION)
+        dialog.ShowModal()
         

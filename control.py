@@ -240,8 +240,10 @@ class EditorControl(stc.StyledTextCtrl):
         mode = self.GetWrapMode()
         if mode == stc.STC_WRAP_WORD:
             self.SetWrapMode(stc.STC_WRAP_NONE)
+            return False
         else:
             self.SetWrapMode(stc.STC_WRAP_WORD)
+            return True
     def find(self, text=None, previous=False, wrap=True, flags=0, use_selection=True):
         if use_selection and settings.USE_SELECTION_FOR_F3:
             text = self.GetSelectedText() or text
