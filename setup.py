@@ -33,7 +33,7 @@ setup(
     options = {"py2exe":{
         "compressed": 1,
         "optimize": 2,
-        "bundle_files": 1,
+        "bundle_files": 3,
     }},
     windows = [{
         "script": "main.py",
@@ -42,5 +42,3 @@ setup(
     }],
     data_files = get_data_files(),
 )
-
-
