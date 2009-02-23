@@ -20,7 +20,7 @@ class Frame(wx.Frame):
         self.create_toolbars()
         manager.Update()
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetIcon(wx.IconFromBitmap(util.get_icon('page_edit.png')))
+        self.SetIcon(wx.Icon('icons/page_edit.ico', wx.BITMAP_TYPE_ICO))
         self.load_state()
         self.notebook.load_state()
         self.rebuild_file_menu()

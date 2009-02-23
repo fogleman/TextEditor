@@ -7,8 +7,8 @@ class Find(wx.Dialog):
     def __init__(self, parent):
         super(Find, self).__init__(parent, -1, 'Find')
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.create_controls(), 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(self.create_controls(), 1, wx.EXPAND|wx.ALL, 10)
+        sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL&~wx.LEFT, 10)
         self.SetSizerAndFit(sizer)
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
         self.load_state()
