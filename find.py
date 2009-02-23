@@ -39,7 +39,7 @@ class Find(wx.Dialog):
     def load_state(self):
         control = self.get_control()
         text = control.GetSelectedText()
-        self.input.SetValue(text)
+        self.input.SetValue(text if text else settings.FIND_TEXT)
         self.input.SetSelection(-1, -1)
         self.whole_word.SetValue(settings.FIND_WHOLE_WORD)
         self.case.SetValue(settings.FIND_MATCH_CASE)
@@ -49,6 +49,7 @@ class Find(wx.Dialog):
         self.down.SetValue(settings.FIND_DOWN)
         self.wrap.SetValue(settings.FIND_WRAP)
     def save_state(self):
+        settings.FIND_TEXT = self.input.GetValue()
         settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
         settings.FIND_MATCH_CASE = self.case.GetValue()
         settings.FIND_REGEX = self.regex.GetValue()

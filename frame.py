@@ -179,12 +179,12 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Copy', self.on_copy, 'page_copy.png')
         util.tool_item(self, toolbar, 'Paste', self.on_paste, 'paste_plain.png')
         toolbar.AddSeparator()
-        util.tool_item(self, toolbar, 'Find', self.on_event, 'find.png')
-        #util.tool_item(self, toolbar, 'Find Next', self.on_event, 'page_white_put.png')
-        #util.tool_item(self, toolbar, 'Find Previous', self.on_event, 'page_white_get.png')
+        util.tool_item(self, toolbar, 'Find', self.on_find, 'find.png')
+        util.tool_item(self, toolbar, 'Find Next', self.on_find_next, 'page_white_put.png')
+        util.tool_item(self, toolbar, 'Find Previous', self.on_find_previous, 'page_white_get.png')
         util.tool_item(self, toolbar, 'Find In Files', self.on_event, 'magnifier.png')
         util.tool_item(self, toolbar, 'Replace', self.on_event, 'text_replace.png')
-        util.tool_item(self, toolbar, 'Goto Line', self.on_event, 'text_linespacing.png')
+        util.tool_item(self, toolbar, 'Goto Line', self.on_goto_line, 'text_linespacing.png')
         toolbar.AddSeparator()
         util.tool_item(self, toolbar, 'Toggle Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
         
@@ -313,10 +313,10 @@ class Frame(wx.Frame):
         if tab: tab.word_wrap()
     def on_find_next(self, event):
         tab = self.notebook.get_window()
-        if tab: tab.find() # TODO: pass search token
+        if tab: tab.find(settings.FIND_TEXT)
     def on_find_previous(self, event):
         tab = self.notebook.get_window()
-        if tab: tab.find(previous=True) # TODO: pass search token
+        if tab: tab.find(settings.FIND_TEXT, previous=True)
     def on_about(self, event):
         dialog = about.About(self)
         dialog.ShowModal()
