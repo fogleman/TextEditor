@@ -13,6 +13,12 @@ def get_icon(file):
     file = 'icons/%s' % file
     return wx.Bitmap(file)
     
+def button(parent, label, func=None, id=-1):
+    button = wx.Button(parent, id, label)
+    if func:
+        button.Bind(wx.EVT_BUTTON, func)
+    return button
+    
 def menu_item(window, menu, label, func, icon=None, kind=wx.ITEM_NORMAL, toolbar=None):
     item = wx.MenuItem(menu, -1, label, kind=kind)
     if func:

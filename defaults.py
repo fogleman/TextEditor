@@ -68,6 +68,13 @@ REMEMBER_OPEN_FILES = True
 SET_DIRECTORY_FOR_OPEN = True
 USE_PSYCO = True
 
+FIND_WHOLE_WORD = False
+FIND_MATCH_CASE = False
+FIND_REGEX = False
+FIND_CLOSE_DIALOG = True
+FIND_DOWN = True
+FIND_WRAP = True
+
 PYTHON_KEYWORDS = \
 '''
 and       del      from    not     while

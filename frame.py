@@ -139,9 +139,9 @@ class Frame(wx.Frame):
         menubar.Append(edit, '&Edit')
         
         search = wx.Menu()
-        util.menu_item(self, search, 'Find...\tCtrl+F', self.on_event, 'find.png')
+        util.menu_item(self, search, 'Find...\tCtrl+F', self.on_find, 'find.png')
         util.menu_item(self, search, 'Find Next\tF3', self.on_find_next, 'page_white_put.png')
-        util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_event, 'page_white_get.png')
+        util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_find_previous, 'page_white_get.png')
         util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
         util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_event, 'text_replace.png')
         util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_goto_line, 'text_linespacing.png')
@@ -199,6 +199,8 @@ class Frame(wx.Frame):
         w2, h2 = pane.GetSize()
         px, py = 32, 8
         return (x+w1-w2-px, y+py)
+    def float(self, window):
+        window.SetPosition(self.get_floating_position(window))
     def on_goto_line(self, event):
         pane = find.GotoLine(self, self.notebook.get_window())
         info = aui.AuiPaneInfo()
@@ -256,6 +258,10 @@ class Frame(wx.Frame):
     def on_save_all(self, event):
         for tab in self.notebook.get_windows():
             self.save(tab)
+    def on_find(self, event):
+        window = find.Find(self)
+        self.float(window)
+        window.Show()
     def on_cut(self, event):
         tab = self.notebook.get_window()
         if tab: tab.Cut()
@@ -305,7 +311,10 @@ class Frame(wx.Frame):
         if tab: tab.word_wrap()
     def on_find_next(self, event):
         tab = self.notebook.get_window()
-        if tab: tab.find_next() # TODO: pass search token
+        if tab: tab.find() # TODO: pass search token
+    def on_find_previous(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.find(previous=True) # TODO: pass search token
     def on_exit(self, event):
         self.Close()
     def on_close(self, event):

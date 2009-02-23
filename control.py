@@ -242,16 +242,23 @@ class EditorControl(stc.StyledTextCtrl):
             self.SetWrapMode(stc.STC_WRAP_NONE)
         else:
             self.SetWrapMode(stc.STC_WRAP_WORD)
-    def find_next(self, text=None):
-        if settings.USE_SELECTION_FOR_F3:
+    def find(self, text=None, previous=False, wrap=True, flags=0, use_selection=True):
+        if use_selection and settings.USE_SELECTION_FOR_F3:
             text = self.GetSelectedText() or text
         if text:
-            start, end = self.GetSelection()
-            for index in (end, 0):
-                index = self.FindText(index, self.GetLength(), text, 0)
-                if index >= 0:
-                    self.SetSelection(index, index + len(text))
+            pos = self.GetSelectionStart() if previous else self.GetSelectionEnd()
+            wrap_pos = self.GetLength() if previous else 0
+            for index in (pos, wrap_pos):
+                self.SetSelection(index, index)
+                self.SearchAnchor()
+                func = self.SearchPrev if previous else self.SearchNext
+                if func(flags, text) >= 0:
                     break
+                if not wrap:
+                    break
+            else:
+                self.SetSelection(pos, pos)
+            self.EnsureCaretVisible()
     def highlight_selection(self):
         self.IndicatorSetStyle(2, stc.STC_INDIC_ROUNDBOX)
         self.IndicatorSetForeground(2, wx.RED)

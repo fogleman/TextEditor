@@ -1,5 +1,119 @@
 import wx
+import wx.stc as stc
+import util
+from settings import settings
 
+class Find(wx.Dialog):
+    def __init__(self, parent):
+        style = wx.CAPTION | wx.RESIZE_BORDER | wx.CLOSE_BOX | wx.SYSTEM_MENU
+        super(Find, self).__init__(parent, -1, 'Find', style=style)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self.create_controls(), 1, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL, 5)
+        self.SetSizerAndFit(sizer)
+        self.Bind(wx.EVT_ACTIVATE, self.on_activate)
+        self.load_state()
+    def get_control(self):
+        return self.GetParent().notebook.get_window()
+    def on_find(self, event):
+        text = self.input.GetValue()
+        flags = self.create_flags()
+        control = self.get_control()
+        previous = self.up.GetValue()
+        wrap = self.wrap.GetValue()
+        close = self.close.GetValue()
+        if text and control:
+            control.find(text, previous, wrap, flags, False)
+        self.input.SetSelection(-1, -1)
+        self.save_state()
+        if close:
+            self.Close()
+    def create_flags(self):
+        flags = 0
+        if self.whole_word.GetValue():
+            flags |= stc.STC_FIND_WHOLEWORD
+        if self.case.GetValue():
+            flags |= stc.STC_FIND_MATCHCASE
+        if self.regex.GetValue():
+            flags |= stc.STC_FIND_REGEXP
+        return flags
+    def load_state(self):
+        control = self.get_control()
+        text = control.GetSelectedText()
+        self.input.SetValue(text)
+        self.input.SetSelection(-1, -1)
+        self.whole_word.SetValue(settings.FIND_WHOLE_WORD)
+        self.case.SetValue(settings.FIND_MATCH_CASE)
+        self.regex.SetValue(settings.FIND_REGEX)
+        self.close.SetValue(settings.FIND_CLOSE_DIALOG)
+        self.up.SetValue(not settings.FIND_DOWN)
+        self.down.SetValue(settings.FIND_DOWN)
+        self.wrap.SetValue(settings.FIND_WRAP)
+    def save_state(self):
+        settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
+        settings.FIND_MATCH_CASE = self.case.GetValue()
+        settings.FIND_REGEX = self.regex.GetValue()
+        settings.FIND_CLOSE_DIALOG = self.close.GetValue()
+        settings.FIND_DOWN = self.down.GetValue()
+        settings.FIND_WRAP = self.wrap.GetValue()
+    def on_activate(self, event):
+        self.SetTransparent(255 if event.GetActive() else 128)
+    def create_controls(self):
+        search_controls = self.create_search_controls()
+        options = self.create_options()
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddSpacer((200, 0))
+        sizer.Add(search_controls, 0, wx.EXPAND|wx.BOTTOM, 5)
+        sizer.Add(options)
+        return sizer
+    def create_search_controls(self):
+        label = wx.StaticText(self, -1, 'Find:')
+        self.input = wx.TextCtrl(self, -1)
+        self.input.SetFocus()
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(label, 0, wx.ALIGN_CENTRE_VERTICAL)
+        sizer.AddSpacer(5)
+        sizer.Add(self.input, 1, wx.EXPAND)
+        return sizer
+    def create_options(self):
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self.create_options1(), 0, wx.EXPAND)
+        sizer.AddSpacer(5)
+        sizer.Add(self.create_options2(), 0, wx.EXPAND)
+        return sizer
+    def create_options1(self):
+        self.whole_word = wx.CheckBox(self, -1, 'Match Whole Word')
+        self.case = wx.CheckBox(self, -1, 'Match Case')
+        self.regex = wx.CheckBox(self, -1, 'Regular Expression')
+        self.close = wx.CheckBox(self, -1, 'Close Dialog')
+        box = wx.StaticBox(self, -1, 'Options')
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        sizer.Add(self.whole_word, 0, wx.ALL, 5)
+        sizer.Add(self.case, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.regex, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.close, 0, wx.ALL&~wx.TOP, 5)
+        return sizer
+    def create_options2(self):
+        self.up = wx.RadioButton(self, -1, 'Up', style=wx.RB_GROUP)
+        self.down = wx.RadioButton(self, -1, 'Down')
+        self.wrap = wx.CheckBox(self, -1, 'Wrap Around')
+        box = wx.StaticBox(self, -1, 'Direction')
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        sizer.Add(self.up, 0, wx.ALL, 5)
+        sizer.Add(self.down, 0, wx.ALL&~wx.TOP, 5)
+        sizer.AddStretchSpacer(1)
+        sizer.Add(self.wrap, 0, wx.ALL&~wx.TOP, 5)
+        return sizer
+    def create_buttons(self):
+        find = util.button(self, 'Find Next', self.on_find)
+        find.SetDefault()
+        cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(find)
+        sizer.AddSpacer(5)
+        sizer.Add(cancel)
+        return sizer
+        
 class GotoLine(wx.Panel):
     def __init__(self, parent, control):
         super(GotoLine, self).__init__(parent, -1)
