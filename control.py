@@ -1,6 +1,7 @@
 import wx
 import wx.stc as stc
 import os
+import util
 from settings import settings
 
 EXTENSIONS = {
@@ -103,24 +104,25 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetMargins(settings.MARGIN_LEFT, settings.MARGIN_RIGHT)
         
         self.SetLexerLanguage(settings.LANGUAGE.lower())
-        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (settings.FONT_FACE, settings.FONT_SIZE+2))
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (settings.FONT_FACE, settings.FONT_SIZE+2))
+        font = util.get_font()
+        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, settings.FONT_SIZE+2))
+        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, settings.FONT_SIZE+2))
         
-        self.StyleSetSpec(stc.STC_P_CHARACTER, 'face:%s,size:%d,fore:grey' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_STRING, 'face:%s,size:%d,fore:grey' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'face:%s,size:%d' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_TRIPLE, 'face:%s,size:%d,fore:#ff6a00' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'face:%s,size:%d,fore:#ff6a00' % (settings.FONT_FACE, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (settings.FONT_FACE, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_STRING, 'face:%s,size:%d,fore:grey' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_TRIPLE, 'face:%s,size:%d,fore:#ff6a00' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'face:%s,size:%d,fore:#ff6a00' % (font, settings.FONT_SIZE))
+        self.StyleSetSpec(stc.STC_P_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, settings.FONT_SIZE))
         
         self.SetKeyWords(0, ' '.join(settings.PYTHON_KEYWORDS.split()))
         

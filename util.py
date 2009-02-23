@@ -9,6 +9,27 @@ class BaseException(Exception):
     def __str__(self):
         return '\n'.join(self.messages)
         
+class FontEnumerator(wx.FontEnumerator):
+    def __init__(self):
+        super(FontEnumerator, self).__init__()
+        self.fonts = []
+        self.EnumerateFacenames(fixedWidthOnly=True)
+    def OnFacename(self, name):
+        self.fonts.append(name)
+        return True
+        
+def get_font():
+    preferred_fonts = [
+        'Bitstream Vera Sans Mono',
+        'Courier New',
+        'Courier',
+    ]
+    enum = FontEnumerator()
+    for font in preferred_fonts:
+        if font in enum.fonts:
+            return font
+    return enum.fonts[0] if enum.fonts else None
+    
 def get_icon(file):
     file = 'icons/%s' % file
     return wx.Bitmap(file)
