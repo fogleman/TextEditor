@@ -95,14 +95,8 @@ class Notebook(aui.AuiNotebook):
         else:
             self.create_tab()
     def recent_path(self, path):
-        if not path: return
-        files = list(settings.RECENT_FILES)
-        if path in files:
-            files.remove(path)
-        files.insert(0, path)
-        if len(files) > settings.RECENT_FILES_SIZE:
-            files = files[:settings.RECENT_FILES_SIZE]
-        settings.RECENT_FILES = files
+        if path:
+            settings.RECENT_FILES = util.add_history(path, settings.RECENT_FILES, settings.RECENT_FILES_SIZE)
     def close_untitled_tab(self):
         windows = self.get_windows()
         if len(windows) == 1:

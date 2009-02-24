@@ -70,14 +70,8 @@ class Find(wx.Dialog):
         self.wrap.SetValue(settings.FIND_WRAP)
     def save_state(self):
         text = self.input.GetValue()
-        history = list(settings.FIND_HISTORY)
-        if text in history:
-            history.remove(text)
-        history.insert(0, text)
-        if len(history) > 10:
-            history = history[:10]
         settings.FIND_TEXT = text
-        settings.FIND_HISTORY = history
+        settings.FIND_HISTORY = util.add_history(text, settings.FIND_HISTORY, 10)
         settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
         settings.FIND_MATCH_CASE = self.case.GetValue()
         settings.FIND_NORMAL = self.normal.GetValue()
@@ -147,6 +141,8 @@ class Find(wx.Dialog):
         find = util.button(self, 'Find Next', self.on_find)
         find.SetDefault()
         cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
+        #replace = util.button(self, 'Replace')
+        #replace_all = util.button(self, 'Replace All')
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(find)
         sizer.AddSpacer(5)

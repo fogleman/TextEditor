@@ -68,3 +68,12 @@ def abbreviate(text, length):
     post = text[-half:]
     return '%s...%s' % (pre, post)
     
+def add_history(new_item, item_list, max_size):
+    result = list(item_list)
+    if new_item in result:
+        result.remove(new_item)
+    result.insert(0, new_item)
+    if len(result) > max_size:
+        result = result[:max_size]
+    return result
+    
