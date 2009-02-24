@@ -17,6 +17,8 @@ class Find(wx.Dialog):
         return self.GetParent().notebook.get_window()
     def on_find(self, event):
         text = self.input.GetValue()
+        if self.extended.GetValue():
+            text = self.convert_backslashes(text)
         flags = self.create_flags()
         control = self.get_control()
         previous = self.up.GetValue()
@@ -24,10 +26,23 @@ class Find(wx.Dialog):
         close = self.close.GetValue()
         if text and control:
             control.find(text, previous, wrap, flags, False)
-        self.input.SetSelection(-1, -1)
+        self.input.SetMark(-1, -1)
+        self.input.SetFocus()
         self.save_state()
         if close:
             self.Close()
+    def convert_backslashes(self, text):
+        text = text.replace(r'\n', '\n')
+        text = text.replace(r'\r', '\r')
+        text = text.replace(r'\t', '\t')
+        text = text.replace(r'\f', '\f')
+        text = text.replace(r'\a', '\a')
+        text = text.replace(r'\b', '\b')
+        text = text.replace(r'\v', '\v')
+        text = text.replace(r'\\', '\\')
+        text = text.replace(r'\"', '"')
+        text = text.replace(r"\'", "'")
+        return text
     def create_flags(self):
         flags = 0
         if self.whole_word.GetValue():
@@ -41,9 +56,11 @@ class Find(wx.Dialog):
         control = self.get_control()
         text = control.GetSelectedText()
         self.input.SetValue(text if text else settings.FIND_TEXT)
-        self.input.SetSelection(-1, -1)
+        self.input.SetMark(-1, -1)
         self.whole_word.SetValue(settings.FIND_WHOLE_WORD)
         self.case.SetValue(settings.FIND_MATCH_CASE)
+        self.normal.SetValue(settings.FIND_NORMAL)
+        self.extended.SetValue(settings.FIND_EXTENDED)
         self.regex.SetValue(settings.FIND_REGEX)
         self.close.SetValue(settings.FIND_CLOSE_DIALOG)
         self.up.SetValue(not settings.FIND_DOWN)
@@ -53,6 +70,8 @@ class Find(wx.Dialog):
         settings.FIND_TEXT = self.input.GetValue()
         settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
         settings.FIND_MATCH_CASE = self.case.GetValue()
+        settings.FIND_NORMAL = self.normal.GetValue()
+        settings.FIND_EXTENDED = self.extended.GetValue()
         settings.FIND_REGEX = self.regex.GetValue()
         settings.FIND_CLOSE_DIALOG = self.close.GetValue()
         settings.FIND_DOWN = self.down.GetValue()
@@ -69,7 +88,7 @@ class Find(wx.Dialog):
         return sizer
     def create_search_controls(self):
         label = wx.StaticText(self, -1, 'Find:')
-        self.input = wx.TextCtrl(self, -1)
+        self.input = wx.ComboBox(self, -1)
         self.input.SetFocus()
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(label, 0, wx.ALIGN_CENTRE_VERTICAL)
@@ -80,30 +99,39 @@ class Find(wx.Dialog):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.create_options1(), 0, wx.EXPAND)
         sizer.AddSpacer(5)
+        sizer.Add(self.create_options3(), 0, wx.EXPAND)
+        sizer.AddSpacer(5)
         sizer.Add(self.create_options2(), 0, wx.EXPAND)
         return sizer
     def create_options1(self):
-        self.whole_word = wx.CheckBox(self, -1, 'Match Whole Word')
         self.case = wx.CheckBox(self, -1, 'Match Case')
-        self.regex = wx.CheckBox(self, -1, 'Regular Expression')
+        self.whole_word = wx.CheckBox(self, -1, 'Match Whole Word')
         self.close = wx.CheckBox(self, -1, 'Close Dialog')
         box = wx.StaticBox(self, -1, 'Options')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-        sizer.Add(self.whole_word, 0, wx.ALL, 5)
-        sizer.Add(self.case, 0, wx.ALL&~wx.TOP, 5)
-        sizer.Add(self.regex, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.case, 0, wx.ALL, 5)
+        sizer.Add(self.whole_word, 0, wx.ALL&~wx.TOP, 5)
         sizer.Add(self.close, 0, wx.ALL&~wx.TOP, 5)
         return sizer
     def create_options2(self):
         self.up = wx.RadioButton(self, -1, 'Up', style=wx.RB_GROUP)
         self.down = wx.RadioButton(self, -1, 'Down')
-        self.wrap = wx.CheckBox(self, -1, 'Wrap Around')
+        self.wrap = wx.CheckBox(self, -1, 'Wrap')
         box = wx.StaticBox(self, -1, 'Direction')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         sizer.Add(self.up, 0, wx.ALL, 5)
         sizer.Add(self.down, 0, wx.ALL&~wx.TOP, 5)
-        sizer.AddStretchSpacer(1)
         sizer.Add(self.wrap, 0, wx.ALL&~wx.TOP, 5)
+        return sizer
+    def create_options3(self):
+        self.normal = wx.RadioButton(self, -1, 'Normal', style=wx.RB_GROUP)
+        self.extended = wx.RadioButton(self, -1, 'Backslashes')
+        self.regex = wx.RadioButton(self, -1, 'Regex')
+        box = wx.StaticBox(self, -1, 'Mode')
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        sizer.Add(self.normal, 0, wx.ALL, 5)
+        sizer.Add(self.extended, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.regex, 0, wx.ALL&~wx.TOP, 5)
         return sizer
     def create_buttons(self):
         find = util.button(self, 'Find Next', self.on_find)
