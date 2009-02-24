@@ -56,6 +56,8 @@ class Find(wx.Dialog):
         control = self.get_control()
         text = control.GetSelectedText()
         self.input.SetValue(text if text else settings.FIND_TEXT)
+        for text in settings.FIND_HISTORY:
+            self.input.Append(text)
         self.input.SetMark(-1, -1)
         self.whole_word.SetValue(settings.FIND_WHOLE_WORD)
         self.case.SetValue(settings.FIND_MATCH_CASE)
@@ -67,7 +69,15 @@ class Find(wx.Dialog):
         self.down.SetValue(settings.FIND_DOWN)
         self.wrap.SetValue(settings.FIND_WRAP)
     def save_state(self):
-        settings.FIND_TEXT = self.input.GetValue()
+        text = self.input.GetValue()
+        history = list(settings.FIND_HISTORY)
+        if text in history:
+            history.remove(text)
+        history.insert(0, text)
+        if len(history) > 10:
+            history = history[:10]
+        settings.FIND_TEXT = text
+        settings.FIND_HISTORY = history
         settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
         settings.FIND_MATCH_CASE = self.case.GetValue()
         settings.FIND_NORMAL = self.normal.GetValue()
@@ -125,13 +135,13 @@ class Find(wx.Dialog):
         return sizer
     def create_options3(self):
         self.normal = wx.RadioButton(self, -1, 'Normal', style=wx.RB_GROUP)
-        self.extended = wx.RadioButton(self, -1, 'Backslashes')
+        self.extended = wx.RadioButton(self, -1, '\\n, \\t, etc.')
         self.regex = wx.RadioButton(self, -1, 'Regex')
         box = wx.StaticBox(self, -1, 'Mode')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         sizer.Add(self.normal, 0, wx.ALL, 5)
-        sizer.Add(self.extended, 0, wx.ALL&~wx.TOP, 5)
         sizer.Add(self.regex, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.extended, 0, wx.ALL&~wx.TOP, 5)
         return sizer
     def create_buttons(self):
         find = util.button(self, 'Find Next', self.on_find)
