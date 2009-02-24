@@ -41,13 +41,18 @@ class EditorEvent(wx.PyEvent):
 EVT_EDITOR_STATUS_CHANGED = wx.PyEventBinder(wx.NewEventType())
 
 class EditorControl(stc.StyledTextCtrl):
+    creation_counter = 0
     LINE_MARGIN = 0
     BOOKMARK_MARGIN = 1
     FOLDING_MARGIN = 2
     def __init__(self, *args, **kwargs):
         super(EditorControl, self).__init__(*args, **kwargs)
-        self.file_path = None
+        EditorControl.creation_counter += 1
+        self._id = EditorControl.creation_counter
+        self._line_count = -1
         self._edited = False
+        self.file_path = None
+        self.mark_stat()
         self.apply_settings()
         self.SetEOLMode(stc.STC_EOL_LF)
         self.SetModEventMask(stc.STC_MOD_INSERTTEXT | stc.STC_MOD_DELETETEXT | stc.STC_PERFORMED_USER | stc.STC_PERFORMED_UNDO | stc.STC_PERFORMED_REDO)
@@ -60,7 +65,7 @@ class EditorControl(stc.StyledTextCtrl):
             pre, name = os.path.split(self.file_path)
             return name
         else:
-            return '(Untitled)'
+            return '(Untitled-%d)' % self._id
     def get_edited(self):
         return self._edited
     def set_edited(self, edited):
@@ -74,6 +79,7 @@ class EditorControl(stc.StyledTextCtrl):
             style = wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION
             if can_veto:
                 style |= wx.CANCEL
+            self.SetFocus()
             dialog = wx.MessageDialog(frame, 'Save changes to file "%s"?' % name, 'Save Changes?', style)
             result = dialog.ShowModal()
             if result == wx.ID_YES:
@@ -103,7 +109,8 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetViewWhiteSpace(settings.VIEW_WHITESPACE)
         self.SetMargins(settings.MARGIN_LEFT, settings.MARGIN_RIGHT)
         
-        self.SetLexerLanguage(settings.LANGUAGE.lower())
+        #self.SetLexerLanguage(settings.LANGUAGE.lower())
+        self.SetLexer(stc.STC_LEX_AUTOMATIC)
         font = util.get_font()
         self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, settings.FONT_SIZE+2))
@@ -128,6 +135,7 @@ class EditorControl(stc.StyledTextCtrl):
         
         self.apply_bookmark_settings()
         self.apply_folding_settings()
+        self.show_line_numbers()
     def apply_bookmark_settings(self):
         if settings.BOOKMARKS:
             self.SetMarginType(self.BOOKMARK_MARGIN, stc.STC_MARGIN_SYMBOL)
@@ -154,6 +162,18 @@ class EditorControl(stc.StyledTextCtrl):
             self.SetProperty("fold", "0")
             self.SetMarginSensitive(self.FOLDING_MARGIN, False)
             self.SetMarginWidth(self.FOLDING_MARGIN, 0)
+    def get_stat(self):
+        path = self.file_path
+        if path:
+            stat = os.stat(path)
+            return (stat.st_size, stat.st_mtime)
+        else:
+            return None
+    def mark_stat(self):
+        self._stat = self.get_stat()
+    def check_stat(self):
+        stat = self.get_stat()
+        return stat == self._stat
     def open_file(self, path):
         file = None
         try:
@@ -169,6 +189,7 @@ class EditorControl(stc.StyledTextCtrl):
         finally:
             if file:
                 file.close()
+            self.mark_stat()
             self.Colourise(0, self.GetLength())
     def save_file(self, path=None):
         path = path or self.file_path
@@ -188,6 +209,7 @@ class EditorControl(stc.StyledTextCtrl):
         finally:
             if file:
                 file.close()
+            self.mark_stat()
             self.Colourise(0, self.GetLength())
         return False
     def reload_file(self):
@@ -213,16 +235,19 @@ class EditorControl(stc.StyledTextCtrl):
                     return
         self.BraceHighlight(invalid, invalid)
     def show_line_numbers(self):
+        self.SetMarginType(self.LINE_MARGIN, stc.STC_MARGIN_NUMBER)
+        self.SetMarginWidth(self.LINE_MARGIN, 0)
+        self.update_line_numbers()
+    def update_line_numbers(self):
         if settings.LINE_NUMBERS:
             lines = self.GetLineCount()
-            text = '%d ' % lines
-            n = len(text)
-            if n < 4: text += ' ' * (4-n)
-            width = self.TextWidth(stc.STC_STYLE_LINENUMBER, text)
-        else:
-            width = 0
-        self.SetMarginType(self.LINE_MARGIN, stc.STC_MARGIN_NUMBER)
-        self.SetMarginWidth(self.LINE_MARGIN, width)
+            if lines != self._line_count:
+                self._line_count = lines
+                text = '%d ' % lines
+                n = len(text)
+                if n < 4: text += ' ' * (4-n)
+                width = self.TextWidth(stc.STC_STYLE_LINENUMBER, text)
+                self.SetMarginWidth(self.LINE_MARGIN, width)
     def lower(self):
         text = self.GetSelectedText()
         self.ReplaceSelection(text.lower())
@@ -291,23 +316,14 @@ class EditorControl(stc.StyledTextCtrl):
             line = self.GetCurrentLine() - 1
             if line >= 0:
                 text = self.GetLine(line)
-                if False and text[:-2].isspace():
-                    start = self.PositionFromLine(line)
-                    end = start + self.LineLength(line) - 2
-                    self.SetSelection(start, end)
-                    self.ReplaceSelection('')
-                    pos = self.PositionFromLine(line+1)
-                    self.SetCurrentPos(pos)
-                    self.SetSelection(pos, pos)
-                else:
-                    index = -1
-                    for i, ch in enumerate(text):
-                        if ch in (' ', '\t'):
-                            index = i
-                        else:
-                            break
-                    if index >= 0:
-                        self.ReplaceSelection(text[:index+1])
+                index = -1
+                for i, ch in enumerate(text):
+                    if ch in (' ', '\t'):
+                        index = i
+                    else:
+                        break
+                if index >= 0:
+                    self.ReplaceSelection(text[:index+1])
     def on_marginclick(self, event):
         margin = event.GetMargin()
         line = self.LineFromPosition(event.GetPosition())
@@ -324,7 +340,7 @@ class EditorControl(stc.StyledTextCtrl):
             self.ToggleFold(line)
     def on_updateui(self, event):
         self.match_brace()
-        self.show_line_numbers()
+        self.update_line_numbers()
         self.highlight_selection()
         
 if __name__ == '__main__':

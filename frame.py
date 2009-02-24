@@ -20,6 +20,7 @@ class Frame(wx.Frame):
         self.create_toolbars()
         manager.Update()
         self.Bind(wx.EVT_CLOSE, self.on_close)
+        self.Bind(wx.EVT_ACTIVATE, self.on_activate)
         self.SetIcon(wx.Icon('icons/page_edit.ico', wx.BITMAP_TYPE_ICO))
         self.load_state()
         self.notebook.load_state()
@@ -203,6 +204,18 @@ class Frame(wx.Frame):
         return (x+w1-w2-px, y+py)
     def float(self, window):
         window.SetPosition(self.get_floating_position(window))
+    def check_file_modifications(self):
+        for tab in self.notebook.get_windows():
+            if not tab.check_stat():
+                tab.mark_stat()
+                name = tab.file_path or tab.get_name()
+                style = wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION
+                dialog = wx.MessageDialog(self, 'Reload changed file "%s"?' % name, 'File Changed', style)
+                result = dialog.ShowModal()
+                if result == wx.ID_YES:
+                    tab.reload_file()
+                else:
+                    tab.edited = True
     def on_goto_line(self, event):
         pane = find.GotoLine(self, self.notebook.get_window())
         info = aui.AuiPaneInfo()
@@ -336,12 +349,18 @@ class Frame(wx.Frame):
             if not tab.confirm_close(self, can_veto):
                 return False
         return True
+    def on_activate(self, event):
+        event.Skip()
+        if event.GetActive():
+            self.check_file_modifications()
     def on_tab_closed(self, event):
         event.Skip()
         self.rebuild_file_menu()
+        self.check_file_modifications()
     def on_tab_changed(self, event):
         event.Skip()
         self.update_title()
+        self.check_file_modifications()
     def update_title(self):
         title = self.notebook.get_title()
         title = '%s - %s' % (title, settings.APP_NAME) if title else settings.APP_NAME
