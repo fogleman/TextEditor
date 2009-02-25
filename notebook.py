@@ -105,8 +105,11 @@ class Notebook(aui.AuiNotebook):
                 self.close_tab(create_untitled=False)
     def create_tab(self, path=None):
         if path:
+            path = os.path.abspath(path)
             for window in self.get_windows():
-                if window.file_path == path:
+                p1 = os.path.normcase(path)
+                p2 = os.path.normcase(window.file_path)
+                if p1 == p2:
                     window.SetFocus()
                     return
         self.Freeze()

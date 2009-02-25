@@ -353,7 +353,7 @@ class EditorControl(stc.StyledTextCtrl):
     def on_right_up(self, event):
         notebook = self.GetParent()
         frame = notebook.GetParent()
-        menu = frame.create_context_menu()
+        menu = frame.create_context_menu(self)
         self.PopupMenu(menu, event.GetPosition())
     def on_change(self, event):
         self.edited = True
