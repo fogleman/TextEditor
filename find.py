@@ -38,10 +38,13 @@ class Find(wx.Dialog):
     def on_replace(self, event):
         control = self.get_control()
         selection = control.GetSelectedText()
+        a, b = control.GetSelection()
         replacement = self.replacement.GetValue()
         if selection:
             # TODO: make smart, don't replace non-matching string
             control.ReplaceSelection(replacement)
+        if self.up.GetValue():
+            control.SetSelection(a, a)
         self.on_find(event)
     def on_replace_all(self, event):
         text = self.input.GetValue()
