@@ -15,7 +15,7 @@ class Find(wx.Dialog):
         self.load_state()
     def get_control(self):
         return self.GetParent().notebook.get_window()
-    def on_find(self, event):
+    def on_find(self, event, mark_all=False):
         text = self.input.GetValue()
         if self.extended.GetValue():
             text = self.convert_backslashes(text)
@@ -25,12 +25,17 @@ class Find(wx.Dialog):
         wrap = self.wrap.GetValue()
         close = self.close.GetValue()
         if text and control:
-            control.find(text, previous, wrap, flags, False)
+            if mark_all:
+                control.mark_text(text)
+            else:
+                control.find(text, previous, wrap, flags, False)
         self.input.SetMark(-1, -1)
         self.input.SetFocus()
         self.save_state()
         if close:
             self.Close()
+    def on_mark_all(self, event):
+        self.on_find(event, mark_all=True)
     def convert_backslashes(self, text):
         text = text.replace(r'\n', '\n')
         text = text.replace(r'\r', '\r')
@@ -140,11 +145,14 @@ class Find(wx.Dialog):
     def create_buttons(self):
         find = util.button(self, 'Find Next', self.on_find)
         find.SetDefault()
+        mark_all = util.button(self, 'Mark All', self.on_mark_all)
         cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
         #replace = util.button(self, 'Replace')
         #replace_all = util.button(self, 'Replace All')
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(find)
+        sizer.AddSpacer(5)
+        sizer.Add(mark_all)
         sizer.AddSpacer(5)
         sizer.Add(cancel)
         return sizer
