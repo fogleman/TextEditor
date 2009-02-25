@@ -4,8 +4,9 @@ import util
 from settings import settings
 
 class Find(wx.Dialog):
-    def __init__(self, parent):
-        super(Find, self).__init__(parent, -1, 'Find')
+    def __init__(self, parent, replace=False):
+        super(Find, self).__init__(parent, -1, 'Replace' if replace else 'Find')
+        self.replace = replace
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.create_controls(), 1, wx.EXPAND|wx.ALL, 10)
         sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL&~wx.LEFT, 10)
@@ -26,7 +27,7 @@ class Find(wx.Dialog):
         close = self.close.GetValue()
         if text and control:
             if mark_all:
-                control.mark_text(text)
+                control.mark_text(text, flags)
             else:
                 control.find(text, previous, wrap, flags, False)
         self.input.SetMark(-1, -1)
@@ -34,6 +35,22 @@ class Find(wx.Dialog):
         self.save_state()
         if close:
             self.Close()
+    def on_replace(self, event):
+        control = self.get_control()
+        selection = control.GetSelectedText()
+        replacement = self.replacement.GetValue()
+        if selection:
+            # TODO: make smart, don't replace non-matching string
+            control.ReplaceSelection(replacement)
+        self.on_find(event)
+    def on_replace_all(self, event):
+        text = self.input.GetValue()
+        if self.extended.GetValue():
+            text = self.convert_backslashes(text)
+        flags = self.create_flags()
+        control = self.get_control()
+        replacement = self.replacement.GetValue()
+        control.replace_all(text, replacement, flags)
     def on_mark_all(self, event):
         self.on_find(event, mark_all=True)
     def convert_backslashes(self, text):
@@ -64,6 +81,10 @@ class Find(wx.Dialog):
         for text in settings.FIND_HISTORY:
             self.input.Append(text)
         self.input.SetMark(-1, -1)
+        if self.replace:
+            self.replacement.SetValue(settings.REPLACE_TEXT)
+            for text in settings.REPLACE_HISTORY:
+                self.replacement.Append(text)
         self.whole_word.SetValue(settings.FIND_WHOLE_WORD)
         self.case.SetValue(settings.FIND_MATCH_CASE)
         self.normal.SetValue(settings.FIND_NORMAL)
@@ -77,6 +98,10 @@ class Find(wx.Dialog):
         text = self.input.GetValue()
         settings.FIND_TEXT = text
         settings.FIND_HISTORY = util.add_history(text, settings.FIND_HISTORY, 10)
+        if self.replace:
+            replacement = self.replacement.GetValue()
+            settings.REPLACE_TEXT = replacement
+            settings.REPLACE_HISTORY = util.add_history(replacement, settings.REPLACE_HISTORY, 10)
         settings.FIND_WHOLE_WORD = self.whole_word.GetValue()
         settings.FIND_MATCH_CASE = self.case.GetValue()
         settings.FIND_NORMAL = self.normal.GetValue()
@@ -96,13 +121,19 @@ class Find(wx.Dialog):
         sizer.Add(options)
         return sizer
     def create_search_controls(self):
-        label = wx.StaticText(self, -1, 'Find:')
+        label1 = wx.StaticText(self, -1, 'Find What:')
         self.input = wx.ComboBox(self, -1)
         self.input.SetFocus()
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(label, 0, wx.ALIGN_CENTRE_VERTICAL)
-        sizer.AddSpacer(5)
+        sizer = wx.FlexGridSizer(2, 2, 5, 5)
+        sizer.AddGrowableCol(1, 1)
+        sizer.Add(label1, 0, wx.ALIGN_CENTRE_VERTICAL)
         sizer.Add(self.input, 1, wx.EXPAND)
+        if self.replace:
+            label2 = wx.StaticText(self, -1, 'Replace With:')
+            self.replacement = wx.ComboBox(self, -1)
+            sizer.Add(label2, 0, wx.ALIGN_CENTRE_VERTICAL)
+            sizer.Add(self.replacement, 1, wx.EXPAND)
         return sizer
     def create_options(self):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -147,11 +178,17 @@ class Find(wx.Dialog):
         find.SetDefault()
         mark_all = util.button(self, 'Mark All', self.on_mark_all)
         cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
-        #replace = util.button(self, 'Replace')
-        #replace_all = util.button(self, 'Replace All')
+        if self.replace:
+            replace = util.button(self, 'Replace', self.on_replace)
+            replace_all = util.button(self, 'Replace All', self.on_replace_all)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(find)
         sizer.AddSpacer(5)
+        if self.replace:
+            sizer.Add(replace)
+            sizer.AddSpacer(5)
+            sizer.Add(replace_all)
+            sizer.AddSpacer(5)
         sizer.Add(mark_all)
         sizer.AddSpacer(5)
         sizer.Add(cancel)

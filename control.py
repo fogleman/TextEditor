@@ -51,7 +51,7 @@ class EditorControl(stc.StyledTextCtrl):
         self._id = EditorControl.creation_counter
         self._line_count = -1
         self._edited = False
-        self._markers = []
+        self._markers = {}
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
@@ -290,6 +290,18 @@ class EditorControl(stc.StyledTextCtrl):
             else:
                 self.SetSelection(pos, pos)
             self.EnsureCaretVisible()
+    def replace_all(self, text, replacement, flags=0):
+        if not text:
+            return
+        index = 0
+        length = len(text)
+        rlength = len(replacement)
+        while True:
+            index = self.FindText(index, self.GetLength(), text, flags)
+            if index < 0: break
+            self.SetSelection(index, index+length)
+            self.ReplaceSelection(replacement)
+            index += rlength
             
     def get_indicator_mask(self, indicator):
         if indicator == 0: return stc.STC_INDIC0_MASK
@@ -305,6 +317,8 @@ class EditorControl(stc.StyledTextCtrl):
         self.StartStyling(start, mask)
         self.SetStyling(length, mask)
     def highlight_all(self, indicator, text, flags):
+        if not text:
+            return
         index = 0
         length = len(text)
         start = self.GetSelectionStart()
@@ -333,21 +347,22 @@ class EditorControl(stc.StyledTextCtrl):
         self.clear_indicator(indicator)
         self.IndicatorSetStyle(indicator, stc.STC_INDIC_ROUNDBOX)
         self.IndicatorSetForeground(indicator, wx.BLUE)
-        flags = stc.STC_FIND_WHOLEWORD | stc.STC_FIND_MATCHCASE
-        for text in self._markers:
+        for text, flags in self._markers.iteritems():
             self.highlight_all(indicator, text, flags)
-    def mark_text(self, text=None):
+    def mark_text(self, text=None, flags=None):
         text = text or self.GetSelectedText()
+        if flags is None:
+            flags = stc.STC_FIND_WHOLEWORD | stc.STC_FIND_MATCHCASE
         if text:
-            self._markers.append(text)
+            self._markers[text] = flags
             self.highlight_markers()
     def unmark_text(self, text=None):
         text = text or self.GetSelectedText()
         if text in self._markers:
-            self._markers.remove(text)
+            del self._markers[text]
             self.highlight_markers()
     def unmark_all(self):
-        self._markers = []
+        self._markers = {}
         self.highlight_markers()
         
     def on_right_up(self, event):

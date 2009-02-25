@@ -160,7 +160,7 @@ class Frame(wx.Frame):
         util.menu_item(self, search, 'Find Next\tF3', self.on_find_next, 'page_white_put.png')
         util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_find_previous, 'page_white_get.png')
         util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
-        util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_event, 'text_replace.png')
+        util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_replace, 'text_replace.png')
         util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_goto_line, 'text_linespacing.png')
         search.AppendSeparator()
         util.menu_item(self, search, 'Mark Selection', self.on_mark_text, 'pencil_add.png')
@@ -205,7 +205,7 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Find Next', self.on_find_next, 'page_white_put.png')
         util.tool_item(self, toolbar, 'Find Previous', self.on_find_previous, 'page_white_get.png')
         util.tool_item(self, toolbar, 'Find In Files', self.on_event, 'magnifier.png')
-        util.tool_item(self, toolbar, 'Replace', self.on_event, 'text_replace.png')
+        util.tool_item(self, toolbar, 'Replace', self.on_replace, 'text_replace.png')
         util.tool_item(self, toolbar, 'Goto Line', self.on_goto_line, 'text_linespacing.png')
         toolbar.AddSeparator()
         util.tool_item(self, toolbar, 'Mark Selection', self.on_mark_text, 'pencil_add.png')
@@ -284,10 +284,12 @@ class Frame(wx.Frame):
     def on_save_all(self, event):
         for tab in self.notebook.get_windows():
             self.save(tab)
-    def on_find(self, event):
-        window = find.Find(self)
+    def on_find(self, event, replace=False):
+        window = find.Find(self, replace)
         self.float(window)
         window.Show()
+    def on_replace(self, event):
+        self.on_find(event, replace=True)
     def on_cut(self, event):
         tab = self.notebook.get_window()
         if tab: tab.Cut()
