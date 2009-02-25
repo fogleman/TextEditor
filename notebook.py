@@ -107,6 +107,8 @@ class Notebook(aui.AuiNotebook):
         if path:
             path = os.path.abspath(path)
             for window in self.get_windows():
+                if not window.file_path:
+                    continue
                 p1 = os.path.normcase(path)
                 p2 = os.path.normcase(window.file_path)
                 if p1 == p2:
