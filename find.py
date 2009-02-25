@@ -12,7 +12,7 @@ class Find(wx.Dialog):
         sizer.Add(self.create_buttons(), 0, wx.EXPAND|wx.ALL&~wx.LEFT, 10)
         self.SetSizerAndFit(sizer)
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
-        self.SetIcon(wx.IconFromBitmap(util.get_icon('find.png')))
+        self.SetIcon(wx.IconFromBitmap(util.get_icon('text_replace.png' if replace else 'find.png')))
         self.load_state()
     def get_control(self):
         return self.GetParent().notebook.get_window()
