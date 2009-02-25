@@ -176,11 +176,11 @@ class Find(wx.Dialog):
     def create_buttons(self):
         find = util.button(self, 'Find Next', self.on_find)
         find.SetDefault()
-        mark_all = util.button(self, 'Mark All', self.on_mark_all)
-        cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
         if self.replace:
             replace = util.button(self, 'Replace', self.on_replace)
             replace_all = util.button(self, 'Replace All', self.on_replace_all)
+        mark_all = util.button(self, 'Mark All', self.on_mark_all)
+        cancel = util.button(self, 'Cancel', id=wx.ID_CANCEL)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(find)
         sizer.AddSpacer(5)
