@@ -51,6 +51,7 @@ class EditorControl(stc.StyledTextCtrl):
         self._id = EditorControl.creation_counter
         self._line_count = -1
         self._edited = False
+        self._markers = []
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
@@ -60,6 +61,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_updateui)
         self.Bind(stc.EVT_STC_CHARADDED, self.on_charadded)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
+        self.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
     def get_name(self):
         if self.file_path:
             pre, name = os.path.split(self.file_path)
@@ -288,26 +290,71 @@ class EditorControl(stc.StyledTextCtrl):
             else:
                 self.SetSelection(pos, pos)
             self.EnsureCaretVisible()
-    def highlight_selection(self):
-        self.IndicatorSetStyle(2, stc.STC_INDIC_ROUNDBOX)
-        self.IndicatorSetForeground(2, wx.RED)
-        self.StartStyling(0, stc.STC_INDIC2_MASK)
+            
+    def get_indicator_mask(self, indicator):
+        if indicator == 0: return stc.STC_INDIC0_MASK
+        if indicator == 1: return stc.STC_INDIC1_MASK
+        if indicator == 2: return stc.STC_INDIC2_MASK
+        return 0
+    def clear_indicator(self, indicator):
+        mask = self.get_indicator_mask(indicator)
+        self.StartStyling(0, mask)
         self.SetStyling(self.GetLength(), 0)
+    def highlight_range(self, indicator, start, length):
+        mask = self.get_indicator_mask(indicator)
+        self.StartStyling(start, mask)
+        self.SetStyling(length, mask)
+    def highlight_all(self, indicator, text, flags):
+        index = 0
+        length = len(text)
+        start = self.GetSelectionStart()
+        while True:
+            index = self.FindText(index, self.GetLength(), text, flags)
+            if index < 0: break
+            if index != start:
+                self.highlight_range(indicator, index, length)
+            index += 1
+    def highlight_selection(self):
+        indicator = 1
+        self.clear_indicator(indicator)
         if not settings.HIGHLIGHT_SELECTION:
             return
+        self.IndicatorSetStyle(indicator, stc.STC_INDIC_ROUNDBOX)
+        self.IndicatorSetForeground(indicator, wx.RED)
         text = self.GetSelectedText()
         if not text or '\n' in text:
             return
-        start = self.GetSelectionStart()
-        index = -1
-        n = len(text)
-        while True:
-            index = self.FindText(index, self.GetLength(), text, stc.STC_FIND_WHOLEWORD|stc.STC_FIND_MATCHCASE)
-            if index < 0: break
-            if index != start:
-                self.StartStyling(index, stc.STC_INDIC2_MASK)
-                self.SetStyling(n, stc.STC_INDIC2_MASK)
-            index += 1
+        if text in self._markers:
+            return
+        flags = stc.STC_FIND_WHOLEWORD | stc.STC_FIND_MATCHCASE
+        self.highlight_all(indicator, text, flags)
+    def highlight_markers(self):
+        indicator = 2
+        self.clear_indicator(indicator)
+        self.IndicatorSetStyle(indicator, stc.STC_INDIC_ROUNDBOX)
+        self.IndicatorSetForeground(indicator, wx.BLUE)
+        flags = stc.STC_FIND_WHOLEWORD | stc.STC_FIND_MATCHCASE
+        for text in self._markers:
+            self.highlight_all(indicator, text, flags)
+    def mark_text(self, text=None):
+        text = text or self.GetSelectedText()
+        if text:
+            self._markers.append(text)
+            self.highlight_markers()
+    def unmark_text(self, text=None):
+        text = text or self.GetSelectedText()
+        if text in self._markers:
+            self._markers.remove(text)
+            self.highlight_markers()
+    def unmark_all(self):
+        self._markers = []
+        self.highlight_markers()
+        
+    def on_right_up(self, event):
+        notebook = self.GetParent()
+        frame = notebook.GetParent()
+        menu = frame.create_context_menu()
+        self.PopupMenu(menu, event.GetPosition())
     def on_change(self, event):
         self.edited = True
     def on_charadded(self, event):
@@ -342,6 +389,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.match_brace()
         self.update_line_numbers()
         self.highlight_selection()
+        self.highlight_markers()
         
 if __name__ == '__main__':
     app = wx.PySimpleApp()

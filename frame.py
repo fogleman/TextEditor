@@ -68,6 +68,22 @@ class Frame(wx.Frame):
         self.manager.AddPane(toolbar, info)
     def rebuild_file_menu(self):
         self.GetMenuBar().Replace(0, self.create_file_menu(), '&File')
+    def create_context_menu(self):
+        menu = wx.Menu()
+        util.menu_item(self, menu, '&Undo\tCtrl+Z', self.on_undo, 'arrow_undo.png')
+        util.menu_item(self, menu, '&Redo\tCtrl+Y', self.on_redo, 'arrow_redo.png')
+        menu.AppendSeparator()
+        util.menu_item(self, menu, 'Cut\tCtrl+X', self.on_cut, 'cut.png')
+        util.menu_item(self, menu, 'Copy\tCtrl+C', self.on_copy, 'page_copy.png')
+        util.menu_item(self, menu, 'Paste\tCtrl+V', self.on_paste, 'paste_plain.png')
+        util.menu_item(self, menu, 'Delete\tDel', self.on_delete, 'delete.png')
+        menu.AppendSeparator()
+        util.menu_item(self, menu, 'Select All\tCtrl+A', self.on_select_all, 'table_go.png')
+        menu.AppendSeparator()
+        util.menu_item(self, menu, 'Mark Selection', self.on_mark_text, 'pencil_add.png')
+        util.menu_item(self, menu, 'Unmark Selection', self.on_unmark_text, 'blank.png')
+        util.menu_item(self, menu, 'Unmark All', self.on_unmark_all, 'pencil_delete.png')
+        return menu
     def create_file_menu(self):
         file = wx.Menu()
         util.menu_item(self, file, '&New\tCtrl+N', self.on_new, 'page.png')
@@ -145,6 +161,10 @@ class Frame(wx.Frame):
         util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
         util.menu_item(self, search, 'Replace...\tCtrl+H', self.on_event, 'text_replace.png')
         util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_goto_line, 'text_linespacing.png')
+        search.AppendSeparator()
+        util.menu_item(self, search, 'Mark Selection', self.on_mark_text, 'pencil_add.png')
+        util.menu_item(self, search, 'Unmark Selection', self.on_unmark_text, 'blank.png')
+        util.menu_item(self, search, 'Unmark All', self.on_unmark_all, 'pencil_delete.png')
         menubar.Append(search, '&Search')
         
         view = wx.Menu()
@@ -187,8 +207,10 @@ class Frame(wx.Frame):
         util.tool_item(self, toolbar, 'Replace', self.on_event, 'text_replace.png')
         util.tool_item(self, toolbar, 'Goto Line', self.on_goto_line, 'text_linespacing.png')
         toolbar.AddSeparator()
+        util.tool_item(self, toolbar, 'Mark Selection', self.on_mark_text, 'pencil_add.png')
+        util.tool_item(self, toolbar, 'Unmark All', self.on_unmark_all, 'pencil_delete.png')
+        toolbar.AddSeparator()
         util.tool_item(self, toolbar, 'Toggle Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
-        
         toolbar.Realize()
         toolbar.Fit()
         return toolbar
@@ -318,6 +340,15 @@ class Frame(wx.Frame):
     def on_find_previous(self, event):
         tab = self.notebook.get_window()
         if tab: tab.find(settings.FIND_TEXT, previous=True)
+    def on_mark_text(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.mark_text()
+    def on_unmark_text(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.unmark_text()
+    def on_unmark_all(self, event):
+        tab = self.notebook.get_window()
+        if tab: tab.unmark_all()
     def on_about(self, event):
         dialog = about.About(self)
         dialog.ShowModal()
