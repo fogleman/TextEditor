@@ -167,8 +167,8 @@ class Notebook(aui.AuiNotebook):
         widget.SetFocus()
         self.bind_tab_control()
         self.recent_path(path)
+        self.check_tabs()
         self.Thaw()
-        wx.CallAfter(self.check_tabs)
     def close_tab(self, index=None, create_untitled=True):
         self.Freeze()
         if index is None: index = self.GetSelection()
@@ -180,8 +180,8 @@ class Notebook(aui.AuiNotebook):
                 wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))
         if self.GetPageCount() == 0 and create_untitled:
             self.create_tab()
+        self.check_tabs()
         self.Thaw()
-        wx.CallAfter(self.check_tabs)
     def close_tabs(self):
         n = self.GetPageCount()
         for i in range(n):
