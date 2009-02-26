@@ -117,13 +117,13 @@ class Notebook(aui.AuiNotebook):
                 child.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.on_tab_right_down)
                 self._tab_controls[child] = []
     def get_open_files(self):
-        files = [window.file_path for window in self.get_windows()]
+        files = [window.file_path for window in self.get_ordered_windows()]
         files = [file for file in files if file]
         return files
     def save_state(self):
         files = self.get_open_files()
         settings.OPEN_FILES = files if settings.REMEMBER_OPEN_FILES else []
-        settings.ACTIVE_TAB = self.GetSelection()
+        settings.ACTIVE_TAB = self.GetSelection() #TODO: use tab order
     def load_state(self):
         if settings.OPEN_FILES:
             for file in settings.OPEN_FILES:
@@ -215,6 +215,10 @@ class Notebook(aui.AuiNotebook):
     def get_windows(self):
         n = self.GetPageCount()
         return [self.get_window(i) for i in range(n)]
+    def get_ordered_windows(self):
+        windows = self.get_windows()
+        order = self._tab_order
+        return [windows[i] for i in order]
     def get_tab_name(self, index=None):
         if index is None: index = self.GetSelection()
         return self.GetPageText(index) if index >= 0 else None
