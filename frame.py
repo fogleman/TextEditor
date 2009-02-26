@@ -100,7 +100,7 @@ class Frame(wx.Frame):
         #util.menu_item(self, file, 'Rename...', self.on_event, 'drive_edit.png')
         #util.menu_item(self, file, 'Delete From Disk', self.on_event, 'cross.png')
         #file.AppendSeparator()
-        util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png')
+        util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png').Enable(False)
         file.AppendSeparator()
         recent_files = self.get_recent_files()
         if recent_files and settings.SHOW_RECENT_FILES:
@@ -159,7 +159,7 @@ class Frame(wx.Frame):
         util.menu_item(self, search, 'Find...\tCtrl+F', self.on_find, 'find.png')
         util.menu_item(self, search, 'Find Next\tF3', self.on_find_next, 'page_white_put.png')
         util.menu_item(self, search, 'Find Previous\tCtrl+F3', self.on_find_previous, 'page_white_get.png')
-        util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png')
+        util.menu_item(self, search, 'Find In Files...\tCtrl+Shift+F', self.on_event, 'magnifier.png').Enable(False)
         util.menu_item(self, search, 'Replace...\tCtrl+R', self.on_replace, 'text_replace.png')
         util.menu_item(self, search, 'Goto Line...\tCtrl+G', self.on_goto_line, 'text_linespacing.png')
         search.AppendSeparator()

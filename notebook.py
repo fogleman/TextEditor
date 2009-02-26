@@ -39,6 +39,7 @@ class Notebook(aui.AuiNotebook):
             
         super(Notebook, self).__init__(parent, -1, style=style)
         self._tab_controls = set()
+        self._right_up_position = (0, 0)
         self.SetDropTarget(DropTarget(self))
         self.SetUniformBitmapSize((21, 21))
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_page_close)
@@ -50,10 +51,24 @@ class Notebook(aui.AuiNotebook):
         event.Veto()
         index = event.GetSelection()
         self.close_tab(index)
-    def on_left_dclick(self, event):
+    def is_tab(self, event):
         x, y = event.GetPosition()
         control = event.GetEventObject()
-        if control.TabHitTest(x, y, None):
+        return control.TabHitTest(x, y, None)
+    def on_right_up(self, event):
+        event.Skip()
+        self._right_up_position = event.GetPosition()
+    def on_tab_right_up(self, event):
+        index = event.GetSelection()
+        if index == self.GetSelection():
+            frame = self.GetParent()
+            #menu = frame.create_context_menu(self.get_window())
+            #self.PopupMenu(menu, self._right_up_position)
+    def on_tab_right_down(self, event):
+        index = event.GetSelection()
+        self.SetSelection(index)
+    def on_left_dclick(self, event):
+        if self.is_tab(event):
             if settings.CLOSE_TAB_ON_DOUBLE_CLICK:
                 self.close_tab()
         else:
@@ -74,6 +89,9 @@ class Notebook(aui.AuiNotebook):
                 continue
             if isinstance(child, aui.AuiTabCtrl):
                 child.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
+                child.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
+                child.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_right_up)
+                child.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.on_tab_right_down)
                 self._tab_controls.add(child)
     def get_open_files(self):
         files = [window.file_path for window in self.get_windows()]
