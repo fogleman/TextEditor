@@ -218,8 +218,10 @@ class Frame(wx.Frame):
     def create_statusbar(self):
         statusbar = self.CreateStatusBar()
         self.statusbar = statusbar
+    def get_control(self):
+        return self.notebook.get_window()
     def get_floating_position(self, pane):
-        anchor = self.notebook.get_window()
+        anchor = self.get_control()
         x, y = anchor.GetScreenPosition()
         w1, h1 = anchor.GetSize()
         w2, h2 = pane.GetSize()
@@ -241,7 +243,7 @@ class Frame(wx.Frame):
         self.notebook.create_tab()
     def on_open(self, event):
         dialog = wx.FileDialog(self, 'Open', style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST|wx.FD_MULTIPLE)
-        tab = self.notebook.get_window()
+        tab = self.get_control()
         if tab and tab.file_path and settings.SET_DIRECTORY_FOR_OPEN:
             directory, file = os.path.split(tab.file_path)
             dialog.SetDirectory(directory)
@@ -265,13 +267,13 @@ class Frame(wx.Frame):
         path = item.GetHelp()
         self.open(path)
     def on_save(self, event):
-        tab = self.notebook.get_window()
+        tab = self.get_control()
         if tab: self.save(tab)
     def save(self, tab):
         if not tab.save_file():
             self.save_as(tab)
     def on_save_as(self, event):
-        tab = self.notebook.get_window()
+        tab = self.get_control()
         if tab: self.save_as(tab)
     def save_as(self, tab):
         dialog = wx.FileDialog(self, 'Save As', style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
@@ -291,41 +293,29 @@ class Frame(wx.Frame):
     def on_replace(self, event):
         self.on_find(event, replace=True)
     def on_cut(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Cut()
+        self.get_control().Cut()
     def on_copy(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Copy()
+        self.get_control().Copy()
     def on_paste(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Paste()
+        self.get_control().Paste()
     def on_select_all(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.SelectAll()
+        self.get_control().SelectAll()
     def on_delete(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Clear()
+        self.get_control().Clear()
     def on_undo(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Undo()
+        self.get_control().Undo()
     def on_redo(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.Redo()
+        self.get_control().Redo()
     def on_sort(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.sort()
+        self.get_control().sort()
     def on_lowercase(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.lower()
+        self.get_control().lower()
     def on_uppercase(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.upper()
+        self.get_control().upper()
     def on_indent(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.indent()
+        self.get_control().indent()
     def on_unindent(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.unindent()
+        self.get_control().unindent()
     def on_close_tab(self, event):
         self.notebook.close_tab()
     def on_close_tabs(self, event):
@@ -335,23 +325,17 @@ class Frame(wx.Frame):
     def on_previous_tab(self, event):
         self.notebook.previous_tab()
     def on_word_wrap(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.word_wrap()
+        self.get_control().word_wrap()
     def on_find_next(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.find(settings.FIND_TEXT)
+        self.get_control().find(settings.FIND_TEXT)
     def on_find_previous(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.find(settings.FIND_TEXT, previous=True)
+        self.get_control().find(settings.FIND_TEXT, previous=True)
     def on_mark_text(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.mark_text()
+        self.get_control().mark_text()
     def on_unmark_text(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.unmark_text()
+        self.get_control().unmark_text()
     def on_unmark_all(self, event):
-        tab = self.notebook.get_window()
-        if tab: tab.unmark_all()
+        self.get_control().unmark_all()
     def on_about(self, event):
         dialog = about.About(self)
         dialog.ShowModal()
