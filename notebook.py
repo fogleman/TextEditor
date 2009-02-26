@@ -38,7 +38,7 @@ class Notebook(aui.AuiNotebook):
             style |= aui.AUI_NB_WINDOWLIST_BUTTON
             
         super(Notebook, self).__init__(parent, -1, style=style)
-        self._tab_controls = set()
+        self._tab_controls = {}
         self._tab_order = []
         self._right_up_position = (0, 0)
         self.SetDropTarget(DropTarget(self))
@@ -48,19 +48,23 @@ class Notebook(aui.AuiNotebook):
         self.Bind(aui.EVT_AUINOTEBOOK_END_DRAG, self.on_end_drag)
     def on_end_drag(self, event):
         event.Skip()
+        self.bind_tab_control()
         wx.CallAfter(self.check_tabs)
     def check_tabs(self):
-        tab_order = []
-        for control in list(self._tab_controls):
+        result = []
+        for control in self._tab_controls.keys():
             if not control:
-                self._tab_controls.remove(control)
+                del self._tab_controls[control]
                 continue
+            tab_order = []
             count = control.GetPageCount()
             for i in range(count):
                 window = control.GetPage(i).window
                 index = self.GetPageIndex(window)
                 tab_order.append(index)
-        self._tab_order = tab_order
+            self._tab_controls[control] = tab_order
+            result.extend(tab_order)
+        self._tab_order = result
     def on_drag_done(self, event):
         event.Skip()
         self.bind_tab_control()
@@ -76,13 +80,15 @@ class Notebook(aui.AuiNotebook):
         event.Skip()
         self._right_up_position = event.GetPosition()
     def on_tab_right_up(self, event):
-        index = event.GetSelection()
+        order = self._tab_controls[event.GetEventObject()]
+        index = order[event.GetSelection()]
         if index == self.GetSelection():
             frame = self.GetParent()
             menu = frame.create_tab_menu()
             event.GetEventObject().PopupMenu(menu, self._right_up_position)
     def on_tab_right_down(self, event):
-        index = event.GetSelection()
+        order = self._tab_controls[event.GetEventObject()]
+        index = order[event.GetSelection()]
         self.SetSelection(index)
     def on_left_dclick(self, event):
         if self.is_tab(event):
@@ -109,7 +115,7 @@ class Notebook(aui.AuiNotebook):
                 child.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
                 child.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_right_up)
                 child.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.on_tab_right_down)
-                self._tab_controls.add(child)
+                self._tab_controls[child] = []
     def get_open_files(self):
         files = [window.file_path for window in self.get_windows()]
         files = [file for file in files if file]
