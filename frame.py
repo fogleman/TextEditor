@@ -71,9 +71,6 @@ class Frame(wx.Frame):
     def create_context_menu(self, control):
         selection = bool(control.GetSelectedText())
         menu = wx.Menu()
-        #util.menu_item(self, menu, 'Undo', self.on_undo, 'arrow_undo.png').Enable(control.CanUndo())
-        #util.menu_item(self, menu, 'Redo', self.on_redo, 'arrow_redo.png').Enable(control.CanRedo())
-        #menu.AppendSeparator()
         util.menu_item(self, menu, 'Cut', self.on_cut, 'cut.png').Enable(selection)
         util.menu_item(self, menu, 'Copy', self.on_copy, 'page_copy.png').Enable(selection)
         util.menu_item(self, menu, 'Paste', self.on_paste, 'paste_plain.png').Enable(control.CanPaste())
@@ -95,7 +92,6 @@ class Frame(wx.Frame):
         util.menu_item(self, menu, 'Save As...', self.on_save_as, 'blank.png')
         menu.AppendSeparator()
         util.menu_item(self, menu, 'Open Containing Folder', self.on_containing_folder, 'folder.png')
-        
         return menu
     def create_file_menu(self):
         file = wx.Menu()
