@@ -15,7 +15,7 @@ class Find(wx.Dialog):
         self.SetIcon(wx.IconFromBitmap(util.get_icon('text_replace.png' if replace else 'find.png')))
         self.load_state()
     def get_control(self):
-        return self.GetParent().notebook.get_window()
+        return self.GetParent().get_control()
     def on_find(self, event, mark_all=False):
         text = self.input.GetValue()
         if self.extended.GetValue():
@@ -54,6 +54,9 @@ class Find(wx.Dialog):
         control = self.get_control()
         replacement = self.replacement.GetValue()
         control.replace_all(text, replacement, flags)
+        self.save_state()
+        if self.close.GetValue():
+            self.Close()
     def on_mark_all(self, event):
         self.on_find(event, mark_all=True)
     def convert_backslashes(self, text):
@@ -197,25 +200,36 @@ class Find(wx.Dialog):
         sizer.Add(cancel)
         return sizer
         
-class GotoLine(wx.Panel):
-    def __init__(self, parent, control):
-        super(GotoLine, self).__init__(parent, -1)
+class GotoLine(wx.Dialog):
+    def __init__(self, parent):
+        super(GotoLine, self).__init__(parent, -1, 'Goto Line')
+        control = parent.get_control()
         self.control = control
-        count = control.GetLineCount()
-        label = wx.StaticText(self, -1, 'Goto Line: (1 - %d)' % count)
-        input = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
-        input.Bind(wx.EVT_TEXT, self.on_text)
-        input.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter)
+        lines = control.GetLineCount()
+        label = wx.StaticText(self, -1, 'Line Number (1 - %d):' % lines)
+        input = wx.TextCtrl(self, -1)
+        self.input = input
+        ok = wx.Button(self, wx.ID_OK, 'OK')
+        ok.SetDefault()
+        ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        cancel = wx.Button(self, wx.ID_CANCEL, 'Cancel')
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.AddSpacer((150,0))
-        sizer.Add(label, 0, wx.ALL, 5)
-        sizer.Add(input, 0, wx.EXPAND|wx.ALL&~wx.TOP, 5)
+        sizer.AddSpacer((250, 0))
+        sizer.Add(label)
+        sizer.AddSpacer(5)
+        sizer.Add(input, 0, wx.EXPAND)
+        sizer.AddSpacer(10)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer(1)
+        buttons.Add(ok)
+        buttons.AddSpacer(5)
+        buttons.Add(cancel)
+        sizer.Add(buttons, 0, wx.EXPAND)
+        sizer = util.padded(sizer, 10)
         self.SetSizerAndFit(sizer)
-    def on_text_enter(self, event):
-        self.on_text(event)
-        self.control.SetFocus()
-    def on_text(self, event):
-        value = event.GetEventObject().GetValue()
+    def on_ok(self, event):
+        value = self.input.GetValue()
+        self.input.SetSelection(-1, -1)
         control = self.control
         try:
             value = int(value)
@@ -223,6 +237,7 @@ class GotoLine(wx.Panel):
             if value > 0 and value <= max:
                 pos = control.PositionFromLine(value-1)
                 control.SetSelection(pos, pos)
+                event.Skip()
         except:
             pass
             

@@ -230,15 +230,9 @@ class Frame(wx.Frame):
     def float(self, window):
         window.SetPosition(self.get_floating_position(window))
     def on_goto_line(self, event):
-        pane = find.GotoLine(self, self.notebook.get_window())
-        info = aui.AuiPaneInfo()
-        info.DefaultPane()
-        info.Caption('Goto Line')
-        info.Float()
-        info.FloatingPosition(self.get_floating_position(pane))
-        self.manager.AddPane(pane, info)
-        self.manager.Update()
-        pane.SetFocus()
+        dialog = find.GotoLine(self)
+        dialog.Centre()
+        dialog.ShowModal()
     def on_new(self, event):
         self.notebook.create_tab()
     def on_open(self, event):

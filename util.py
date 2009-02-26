@@ -34,6 +34,11 @@ def get_icon(file):
     file = 'icons/%s' % file
     return wx.Bitmap(file)
     
+def padded(window, padding):
+    sizer = wx.BoxSizer(wx.VERTICAL)
+    sizer.Add(window, 1, wx.EXPAND|wx.ALL, padding)
+    return sizer
+    
 def button(parent, label, func=None, id=-1):
     button = wx.Button(parent, id, label)
     if func:
