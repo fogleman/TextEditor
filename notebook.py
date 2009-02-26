@@ -63,7 +63,7 @@ class Notebook(aui.AuiNotebook):
         if index == self.GetSelection():
             frame = self.GetParent()
             menu = frame.create_tab_menu()
-            self.PopupMenu(menu, self._right_up_position)
+            event.GetEventObject().PopupMenu(menu, self._right_up_position)
     def on_tab_right_down(self, event):
         index = event.GetSelection()
         self.SetSelection(index)
