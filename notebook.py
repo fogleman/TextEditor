@@ -62,8 +62,8 @@ class Notebook(aui.AuiNotebook):
         index = event.GetSelection()
         if index == self.GetSelection():
             frame = self.GetParent()
-            #menu = frame.create_context_menu(self.get_window())
-            #self.PopupMenu(menu, self._right_up_position)
+            menu = frame.create_tab_menu()#self.get_window())
+            self.PopupMenu(menu, self._right_up_position)
     def on_tab_right_down(self, event):
         index = event.GetSelection()
         self.SetSelection(index)
@@ -161,6 +161,15 @@ class Notebook(aui.AuiNotebook):
         n = self.GetPageCount()
         for i in range(n):
             self.close_tab(0)
+    def close_other_tabs(self):
+        n = self.GetPageCount()
+        index = self.GetSelection()
+        before = index
+        after = n - index - 1
+        for i in range(before):
+            self.close_tab(0)
+        for i in range(after):
+            self.close_tab(1)
     def next_tab(self):
         n = self.GetPageCount()
         if n < 2: return

@@ -85,6 +85,18 @@ class Frame(wx.Frame):
         util.menu_item(self, menu, 'Unmark Selection', self.on_unmark_text, 'blank.png').Enable(selection)
         util.menu_item(self, menu, 'Unmark All', self.on_unmark_all, 'pencil_delete.png').Enable(bool(control._markers))
         return menu
+    def create_tab_menu(self):
+        menu = wx.Menu()
+        util.menu_item(self, menu, 'Close', self.on_close_tab, 'page_delete.png')
+        util.menu_item(self, menu, 'Close Others', self.on_close_other_tabs, 'blank.png')
+        util.menu_item(self, menu, 'Close All', self.on_close_tabs, 'blank.png')
+        menu.AppendSeparator()
+        util.menu_item(self, menu, 'Save', self.on_save, 'disk.png')
+        util.menu_item(self, menu, 'Save As...', self.on_save_as, 'blank.png')
+        menu.AppendSeparator()
+        util.menu_item(self, menu, 'Open Containing Folder', self.on_containing_folder, 'folder.png')
+        
+        return menu
     def create_file_menu(self):
         file = wx.Menu()
         util.menu_item(self, file, '&New\tCtrl+N', self.on_new, 'page.png')
@@ -314,10 +326,17 @@ class Frame(wx.Frame):
         self.notebook.close_tab()
     def on_close_tabs(self, event):
         self.notebook.close_tabs()
+    def on_close_other_tabs(self, event):
+        self.notebook.close_other_tabs()
     def on_next_tab(self, event):
         self.notebook.next_tab()
     def on_previous_tab(self, event):
         self.notebook.previous_tab()
+    def on_containing_folder(self, event):
+        path = self.get_control().file_path
+        if path:
+            proc = 'explorer.exe /select,"%s"' % path
+            wx.Execute(proc)
     def on_word_wrap(self, event):
         self.get_control().word_wrap()
     def on_find_next(self, event):
