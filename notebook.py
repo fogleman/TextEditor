@@ -39,11 +39,28 @@ class Notebook(aui.AuiNotebook):
             
         super(Notebook, self).__init__(parent, -1, style=style)
         self._tab_controls = set()
+        self._tab_order = []
         self._right_up_position = (0, 0)
         self.SetDropTarget(DropTarget(self))
         self.SetUniformBitmapSize((21, 21))
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_page_close)
         self.Bind(aui.EVT_AUINOTEBOOK_DRAG_DONE, self.on_drag_done)
+        self.Bind(aui.EVT_AUINOTEBOOK_END_DRAG, self.on_end_drag)
+    def on_end_drag(self, event):
+        event.Skip()
+        wx.CallAfter(self.check_tabs)
+    def check_tabs(self):
+        tab_order = []
+        for control in list(self._tab_controls):
+            if not control:
+                self._tab_controls.remove(control)
+                continue
+            count = control.GetPageCount()
+            for i in range(count):
+                window = control.GetPage(i).window
+                index = self.GetPageIndex(window)
+                tab_order.append(index)
+        self._tab_order = tab_order
     def on_drag_done(self, event):
         event.Skip()
         self.bind_tab_control()
@@ -145,6 +162,7 @@ class Notebook(aui.AuiNotebook):
         self.bind_tab_control()
         self.recent_path(path)
         self.Thaw()
+        wx.CallAfter(self.check_tabs)
     def close_tab(self, index=None, create_untitled=True):
         self.Freeze()
         if index is None: index = self.GetSelection()
@@ -157,6 +175,7 @@ class Notebook(aui.AuiNotebook):
         if self.GetPageCount() == 0 and create_untitled:
             self.create_tab()
         self.Thaw()
+        wx.CallAfter(self.check_tabs)
     def close_tabs(self):
         n = self.GetPageCount()
         for i in range(n):
@@ -171,15 +190,19 @@ class Notebook(aui.AuiNotebook):
         for i in range(after):
             self.close_tab(1)
     def next_tab(self):
-        n = self.GetPageCount()
-        if n < 2: return
-        i = self.GetSelection()
-        self.SetSelection((i+1)%n)
+        index = self.GetSelection()
+        order = self._tab_order
+        if index in order:
+            i = order.index(index)
+            n = len(order)
+            self.SetSelection(order[(i+1)%n])
     def previous_tab(self):
-        n = self.GetPageCount()
-        if n < 2: return
-        i = self.GetSelection()
-        self.SetSelection((i+n-1)%n)
+        index = self.GetSelection()
+        order = self._tab_order
+        if index in order:
+            i = order.index(index)
+            n = len(order)
+            self.SetSelection(order[(i+n-1)%n])
     def get_window(self, index=None):
         if index is None: index = self.GetSelection()
         return self.GetPage(index) if index >= 0 else None
