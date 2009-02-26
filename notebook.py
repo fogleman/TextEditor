@@ -132,7 +132,7 @@ class Notebook(aui.AuiNotebook):
         if index is None: index = self.GetSelection()
         if index >= 0:
             window = self.get_window(index)
-            if window.confirm_close(self.GetParent(), True):
+            if window.confirm_close(True):
                 self.recent_path(window.file_path)
                 self.DeletePage(index)
                 wx.PostEvent(self, NotebookEvent(EVT_NOTEBOOK_TAB_CLOSED, self))

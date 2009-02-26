@@ -75,8 +75,13 @@ class EditorControl(stc.StyledTextCtrl):
             self._edited = edited
             wx.PostEvent(self, EditorEvent(EVT_EDITOR_STATUS_CHANGED, self))
     edited = property(get_edited, set_edited)
-    def confirm_close(self, frame, can_veto=True):
+    def get_frame(self):
+        notebook = self.GetParent()
+        frame = notebook.GetParent()
+        return frame
+    def confirm_close(self, can_veto=True):
         if self.edited and settings.CONFIRM_CLOSE_WITH_EDITS:
+            frame = self.get_frame()
             name = self.file_path or self.get_name()
             style = wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION
             if can_veto:
@@ -366,8 +371,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.highlight_markers()
         
     def on_right_up(self, event):
-        notebook = self.GetParent()
-        frame = notebook.GetParent()
+        frame = self.get_frame()
         menu = frame.create_context_menu(self)
         self.PopupMenu(menu, event.GetPosition())
     def on_change(self, event):

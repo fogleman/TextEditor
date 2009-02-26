@@ -346,7 +346,7 @@ class Frame(wx.Frame):
         self.notebook.save_state()
     def confirm_close(self, can_veto):
         for tab in self.notebook.get_windows():
-            if not tab.confirm_close(self, can_veto):
+            if not tab.confirm_close(can_veto):
                 return False
         return True
     def on_activate(self, event):
