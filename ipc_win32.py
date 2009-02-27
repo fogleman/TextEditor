@@ -10,7 +10,7 @@ class CallbackContainer(object):
         self.callback = None
     def __call__(self, message):
         if self.callback:
-            self.callback(message)
+            wx.CallAfter(self.callback, message)
             
 def init():
     container = CallbackContainer()
@@ -50,7 +50,7 @@ def server(name, callback_func):
         error, message = win32file.ReadFile(handle, buffer, None)
         win32pipe.DisconnectNamedPipe(handle)
         if error == 0:
-            wx.CallAfter(callback_func, message)
+            callback_func(message)
         else:
             error = True
             

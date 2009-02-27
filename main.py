@@ -1,5 +1,12 @@
-from settings import settings
-
+def set_path():
+    import os
+    import dummy
+    file = dummy.__file__
+    file = os.path.abspath(file)
+    while file and not os.path.isdir(file):
+        file, ext = os.path.split(file)
+    os.chdir(file)
+    
 def activate_psyco():
     try:
         import psyco
@@ -7,19 +14,10 @@ def activate_psyco():
     except:
         pass
         
-def set_path(module):
-    import os
-    file = module.__file__
-    file = os.path.abspath(file)
-    while file and not os.path.isdir(file):
-        file, dummy = os.path.split(file)
-    os.chdir(file)
-    
 def run():
     import wx
     import frame
     import ipc_win32 as ipc
-    set_path(frame)
     app = wx.PySimpleApp()
     container, message = ipc.init()
     if container:
@@ -30,6 +28,8 @@ def run():
         app.MainLoop()
         
 if __name__ == '__main__':
+    set_path()
+    from settings import settings
     if settings.USE_PSYCO:
         activate_psyco()
     run()
