@@ -25,6 +25,14 @@ class Frame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
         self.SetIcon(wx.Icon('icons/page_edit.ico', wx.BITMAP_TYPE_ICO))
+    def parse_args(self, args):
+        files = args.split(';')
+        files = [file.strip() for file in files]
+        files = filter(bool, files)
+        for file in files:
+            path = os.path.abspath(file)
+            if os.path.exists(path):
+                self.open(path)
     def set_default_size(self):
         w = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
         h = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)

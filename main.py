@@ -10,11 +10,16 @@ def activate_psyco():
 def run():
     import wx
     import frame
+    import ipc_win32 as ipc
     app = wx.PySimpleApp()
-    window = frame.Frame()
-    window.Show()
-    app.MainLoop()
-    
+    container, message = ipc.init()
+    if container:
+        window = frame.Frame()
+        container.callback = window.parse_args
+        container(message)
+        window.Show()
+        app.MainLoop()
+        
 if __name__ == '__main__':
     if settings.USE_PSYCO:
         activate_psyco()

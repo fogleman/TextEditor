@@ -1,0 +1,65 @@
+import wx
+import win32file
+import win32pipe
+import threading
+import time
+import sys
+
+class CallbackContainer(object):
+    def __init__(self):
+        self.callback = None
+    def __call__(self, message):
+        if self.callback:
+            self.callback(message)
+            
+def init():
+    container = CallbackContainer()
+    name = r'\\.\pipe\SingleInstanceTextEditor_%s' % wx.GetUserId()
+    message = ';'.join(sys.argv[1:])
+    if client(name, message):
+        return None, message
+    else:
+        thread = threading.Thread(target=server, args=(name, container))
+        thread.setDaemon(True)
+        thread.start()
+        return container, message
+        
+def server(name, callback_func):
+    buffer = 4096
+    timeout = 1000
+    error = False
+    while True:
+        if error:
+            time.sleep(1)
+            error = False
+        handle = win32pipe.CreateNamedPipe(
+            name,
+            win32pipe.PIPE_ACCESS_INBOUND,
+            win32pipe.PIPE_TYPE_BYTE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT,
+            win32pipe.PIPE_UNLIMITED_INSTANCES,
+            buffer,
+            buffer,
+            timeout,
+            None)
+        if handle == win32file.INVALID_HANDLE_VALUE:
+            error = True
+            continue
+        if win32pipe.ConnectNamedPipe(handle) != 0:
+            error = True
+            continue
+        error, message = win32file.ReadFile(handle, buffer, None)
+        win32pipe.DisconnectNamedPipe(handle)
+        if error == 0:
+            wx.CallAfter(callback_func, message)
+        else:
+            error = True
+            
+def client(name, message):
+    try:
+        file = open(name, 'w')
+        file.write(message)
+        file.close()
+        return True
+    except IOError:
+        return False
+        
