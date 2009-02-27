@@ -1,4 +1,2 @@
-open file(s) from arguments
-pass file(s) with IPC if single instance
 apply styling on save with new extension
 drag and drop both text and files

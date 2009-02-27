@@ -17,7 +17,10 @@ def activate_psyco():
 def run():
     import wx
     import frame
-    import ipc_win32 as ipc
+    try:
+        import ipc_win32 as ipc
+    except:
+        import ipc_none as ipc
     app = wx.PySimpleApp()
     container, message = ipc.init()
     if container:

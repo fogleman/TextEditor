@@ -1,36 +1,12 @@
 File
-    New
-    Open
-    Save
-    Save As
-    Save All
-    Close
-    Close All
     Reload
     Rename
     Delete
     Print
     Print Preview
     Page Setup
-    Recent Files
-    Exit
-Edit
-    Undo
-    Redo
-    Cut
-    Copy
-    Paste
-    Delete
-    Select All
-    Lowercase
-    Uppercase
 Search
-    Find
-    Find Next
-    Find Previous
     Find in Files
-    Replace
-    Goto
 View
     Toolbars
     Menus
@@ -47,11 +23,5 @@ Tools
     Record
     Playback
     Save Macro
-Window
-    List Tabs
-    Close
-    Close All
-    Close Others
 Help
     Help Contents
-    About
