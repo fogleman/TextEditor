@@ -292,7 +292,7 @@ class Frame(wx.Frame):
         result = dialog.ShowModal()
         if result == wx.ID_OK:
             path = dialog.GetPath()
-            tab.save_file(path)
+            tab.save_file(path, force=True)
             self.notebook.update_tab_name(tab)
             self.update_title()
     def on_save_all(self, event):

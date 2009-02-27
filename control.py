@@ -9,6 +9,9 @@ EXTENSIONS = {
 '.asp': 'asp',
 '.bat': 'batch',
 '.conf': 'conf',
+'.c': 'cpp',
+'.h': 'cpp',
+'.hpp': 'cpp',
 '.cpp': 'cpp',
 '.diff': 'diff',
 '.xhtml': 'hypertext',
@@ -30,6 +33,11 @@ EXTENSIONS = {
 '.vb': 'vb',
 '.vbscript': 'vbscript',
 '.xml': 'xml',
+}
+
+KEYWORDS = {
+    'cpp': settings.CPP_KEYWORDS,
+    'python': settings.PYTHON_KEYWORDS,
 }
 
 class EditorEvent(wx.PyEvent):
@@ -116,29 +124,13 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetViewWhiteSpace(settings.VIEW_WHITESPACE)
         self.SetMargins(settings.MARGIN_LEFT, settings.MARGIN_RIGHT)
         
-        #self.SetLexerLanguage(settings.LANGUAGE.lower())
-        self.SetLexer(stc.STC_LEX_AUTOMATIC)
         font = util.get_font()
-        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, settings.FONT_SIZE+2))
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, settings.FONT_SIZE+2))
+        size = settings.FONT_SIZE
+        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, size+2))
+        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, size+2))
         
-        self.StyleSetSpec(stc.STC_P_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_STRING, 'face:%s,size:%d,fore:grey' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'face:%s,size:%d' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_TRIPLE, 'face:%s,size:%d,fore:#ff6a00' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'face:%s,size:%d,fore:#ff6a00' % (font, settings.FONT_SIZE))
-        self.StyleSetSpec(stc.STC_P_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, settings.FONT_SIZE))
-        
-        self.SetKeyWords(0, ' '.join(settings.PYTHON_KEYWORDS.split()))
+
         
         self.apply_bookmark_settings()
         self.apply_folding_settings()
@@ -198,11 +190,11 @@ class EditorControl(stc.StyledTextCtrl):
                 file.close()
             self.mark_stat()
             self.Colourise(0, self.GetLength())
-    def save_file(self, path=None):
+    def save_file(self, path=None, force=False):
         path = path or self.file_path
         if not path:
             return False
-        if not self.edited:
+        if not self.edited and not force:
             return True
         file = None
         try:
@@ -223,14 +215,24 @@ class EditorControl(stc.StyledTextCtrl):
         if self.file_path:
             self.open_file(self.file_path)
     def detect_language(self):
+        self.SetKeyWords(0, '')
+        self.SetLexer(stc.STC_LEX_NULL)
+        self.StartStyling(0, 0x1F)
+        self.SetStyling(self.GetLength(), stc.STC_STYLE_DEFAULT)
         path = self.file_path
         if path:
             pre, ext = os.path.splitext(path)
             ext = ext.lower()
             if ext in EXTENSIONS:
-                self.SetLexerLanguage(EXTENSIONS[ext])
-                return
-        self.SetLexer(stc.STC_LEX_AUTOMATIC)
+                language = EXTENSIONS[ext]
+                self.SetLexerLanguage(language)
+                if language in KEYWORDS:
+                    keywords = KEYWORDS[language]
+                    self.SetKeyWords(0, ' '.join(keywords.split()))
+                if language == 'python':
+                    self.apply_python()
+                if language == 'cpp':
+                    self.apply_cpp()
     def match_brace(self):
         invalid = stc.STC_INVALID_POSITION
         if settings.MATCH_BRACES:
@@ -410,11 +412,44 @@ class EditorControl(stc.StyledTextCtrl):
         self.highlight_selection()
         self.highlight_markers()
         
-if __name__ == '__main__':
-    app = wx.PySimpleApp()
-    frame = wx.Frame(None, -1, 'Editor Control')
-    control = EditorControl(frame, -1)
-    frame.SetSize((800, 600))
-    frame.Show()
-    app.MainLoop()
-    
+    def apply_python(self):
+        font = util.get_font()
+        size = settings.FONT_SIZE
+        self.StyleSetSpec(stc.STC_P_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, size))
+        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (font, size))
+        self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (font, size))
+        self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (font, size))
+        self.StyleSetSpec(stc.STC_P_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, size))
+        self.StyleSetSpec(stc.STC_P_STRING, 'face:%s,size:%d,fore:grey' % (font, size))
+        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_P_TRIPLE, 'face:%s,size:%d,fore:#ff6a00' % (font, size))
+        self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'face:%s,size:%d,fore:#ff6a00' % (font, size))
+        self.StyleSetSpec(stc.STC_P_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
+        
+    def apply_cpp(self):
+        font = util.get_font()
+        size = settings.FONT_SIZE
+        self.StyleSetSpec(stc.STC_C_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENT, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENTDOC, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENTDOCKEYWORD, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENTDOCKEYWORDERROR, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_COMMENTLINEDOC, 'face:%s,size:%d,fore:forest green' % (font, size))
+        self.StyleSetSpec(stc.STC_C_DEFAULT, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_IDENTIFIER, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_NUMBER, 'face:%s,size:%d,fore:red' % (font, size))
+        self.StyleSetSpec(stc.STC_C_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, size))
+        self.StyleSetSpec(stc.STC_C_PREPROCESSOR, 'face:%s,size:%d,bold,fore:maroon' % (font, size))
+        self.StyleSetSpec(stc.STC_C_REGEX, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_STRING, 'face:%s,size:%d,fore:grey' % (font, size))
+        self.StyleSetSpec(stc.STC_C_STRINGEOL, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_UUID, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_VERBATIM, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_C_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
+        self.StyleSetSpec(stc.STC_C_WORD2, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
+        
