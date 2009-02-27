@@ -1,6 +1,7 @@
 Text Editor: Alpha Release
 ==========================
 By Michael Fogleman
+http://www.michaelfogleman.com/
 
 Menu and toolbar icons provided by Mark James:
 http://www.famfamfam.com/
