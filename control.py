@@ -60,6 +60,7 @@ class EditorControl(stc.StyledTextCtrl):
         self._line_count = -1
         self._edited = False
         self._markers = {}
+        self._indic_dirty = [False]*3
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
@@ -103,6 +104,11 @@ class EditorControl(stc.StyledTextCtrl):
                 return False
         return True
     def apply_settings(self):
+        self.IndicatorSetStyle(1, stc.STC_INDIC_ROUNDBOX)
+        self.IndicatorSetForeground(1, wx.RED)
+        self.IndicatorSetStyle(2, stc.STC_INDIC_ROUNDBOX)
+        self.IndicatorSetForeground(2, wx.BLUE)
+        
         self.SetCaretForeground(settings.CARET_FOREGROUND)
         self.SetCaretLineVisible(settings.CARET_LINE_VISIBLE)
         self.SetCaretLineBack(settings.CARET_LINE_BACKGROUND)
@@ -215,10 +221,9 @@ class EditorControl(stc.StyledTextCtrl):
         if self.file_path:
             self.open_file(self.file_path)
     def detect_language(self):
+        self.ClearDocumentStyle()
         self.SetKeyWords(0, '')
         self.SetLexer(stc.STC_LEX_NULL)
-        self.StartStyling(0, 0x1F)
-        self.SetStyling(self.GetLength(), stc.STC_STYLE_DEFAULT)
         path = self.file_path
         if path:
             pre, ext = os.path.splitext(path)
@@ -316,9 +321,11 @@ class EditorControl(stc.StyledTextCtrl):
         if indicator == 2: return stc.STC_INDIC2_MASK
         return 0
     def clear_indicator(self, indicator):
-        mask = self.get_indicator_mask(indicator)
-        self.StartStyling(0, mask)
-        self.SetStyling(self.GetLength(), 0)
+        if self._indic_dirty[indicator]:
+            self._indic_dirty[indicator] = False
+            mask = self.get_indicator_mask(indicator)
+            self.StartStyling(0, mask)
+            self.SetStyling(self.GetLength(), 0)
     def highlight_range(self, indicator, start, length):
         mask = self.get_indicator_mask(indicator)
         self.StartStyling(start, mask)
@@ -329,19 +336,22 @@ class EditorControl(stc.StyledTextCtrl):
         index = 0
         length = len(text)
         start = self.GetSelectionStart()
+        count = 0
         while True:
             index = self.FindText(index, self.GetLength(), text, flags)
             if index < 0: break
             if index != start:
                 self.highlight_range(indicator, index, length)
+                count += 1
             index += 1
+        if count > 0:
+            self._indic_dirty[indicator] = True
+        return count
     def highlight_selection(self):
         indicator = 1
         self.clear_indicator(indicator)
         if not settings.HIGHLIGHT_SELECTION:
             return
-        self.IndicatorSetStyle(indicator, stc.STC_INDIC_ROUNDBOX)
-        self.IndicatorSetForeground(indicator, wx.RED)
         text = self.GetSelectedText()
         if not text or '\n' in text:
             return
@@ -352,8 +362,6 @@ class EditorControl(stc.StyledTextCtrl):
     def highlight_markers(self):
         indicator = 2
         self.clear_indicator(indicator)
-        self.IndicatorSetStyle(indicator, stc.STC_INDIC_ROUNDBOX)
-        self.IndicatorSetForeground(indicator, wx.BLUE)
         for text, flags in self._markers.iteritems():
             self.highlight_all(indicator, text, flags)
     def mark_text(self, text=None, flags=None):
