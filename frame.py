@@ -33,6 +33,8 @@ class Frame(wx.Frame):
             path = os.path.abspath(file)
             if os.path.exists(path):
                 self.open(path)
+        self.Raise()
+        self.SetFocus()
     def set_default_size(self):
         w = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
         h = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)
@@ -42,7 +44,7 @@ class Frame(wx.Frame):
         size = (n*wr, n*hr)
         self.SetSize(size)
     def save_state(self):
-        if settings.MAIN_WINDOW_PERSISTED:
+        if settings.MAIN_WINDOW_PERSISTED and not self.IsIconized():
             if self.IsMaximized():
                 settings.MAIN_WINDOW_MAXIMIZED = True
             else:

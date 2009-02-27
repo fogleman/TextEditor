@@ -7,10 +7,19 @@ def activate_psyco():
     except:
         pass
         
+def set_path(module):
+    import os
+    file = module.__file__
+    file = os.path.abspath(file)
+    while file and not os.path.isdir(file):
+        file, dummy = os.path.split(file)
+    os.chdir(file)
+    
 def run():
     import wx
     import frame
     import ipc_win32 as ipc
+    set_path(frame)
     app = wx.PySimpleApp()
     container, message = ipc.init()
     if container:
