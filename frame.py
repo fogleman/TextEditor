@@ -116,7 +116,7 @@ class Frame(wx.Frame):
         file.AppendSeparator()
         util.menu_item(self, file, 'Reload', self.on_reload, 'arrow_refresh_small.png')
         #util.menu_item(self, file, 'Rename...', self.on_event, 'drive_edit.png')
-        #util.menu_item(self, file, 'Delete From Disk', self.on_event, 'cross.png')
+        util.menu_item(self, file, 'Delete From Disk', self.on_delete_file, 'cross.png')
         file.AppendSeparator()
         util.menu_item(self, file, 'Print...\tCtrl+P', self.on_event, 'printer.png').Enable(False)
         file.AppendSeparator()
@@ -330,6 +330,8 @@ class Frame(wx.Frame):
         self.get_control().unindent()
     def on_reload(self, event):
         self.get_control().reload_file()
+    def on_delete_file(self, event):
+        self.notebook.delete_file()
     def on_close_tab(self, event):
         self.notebook.close_tab()
     def on_close_tabs(self, event):

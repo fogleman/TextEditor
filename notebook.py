@@ -195,6 +195,17 @@ class Notebook(aui.AuiNotebook):
             self.close_tab(0)
         for i in range(after):
             self.close_tab(1)
+    def delete_file(self):
+        window = self.get_window()
+        path = window.file_path
+        if path:
+            frame = self.GetParent()
+            style = wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION
+            dialog = wx.MessageDialog(frame, 'Delete the file "%s" from disk?\n\nWARNING: This operation cannot be undone!' % path, 'Delete File?', style)
+            result = dialog.ShowModal()
+            if result == wx.ID_YES:
+                os.remove(path)
+                self.close_tab()
     def next_tab(self):
         index = self.GetSelection()
         order = self._tab_order
