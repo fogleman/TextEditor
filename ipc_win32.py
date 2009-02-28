@@ -44,15 +44,20 @@ def server(name, callback_func):
         if handle == win32file.INVALID_HANDLE_VALUE:
             error = True
             continue
-        if win32pipe.ConnectNamedPipe(handle) != 0:
+        try:
+            if win32pipe.ConnectNamedPipe(handle) != 0:
+                error = True
+            else:
+                code, message = win32file.ReadFile(handle, buffer, None)
+                if code == 0:
+                    callback_func(message)
+                else:
+                    error = True
+        except:
             error = True
-            continue
-        error, message = win32file.ReadFile(handle, buffer, None)
-        win32pipe.DisconnectNamedPipe(handle)
-        if error == 0:
-            callback_func(message)
-        else:
-            error = True
+        finally:
+            win32pipe.DisconnectNamedPipe(handle)
+            win32file.CloseHandle(handle)
             
 def client(name, message):
     try:
