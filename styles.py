@@ -1,4 +1,5 @@
 import wx
+import wx.stc as stc
 import util
 
 class Style(object):
@@ -8,7 +9,7 @@ class Style(object):
         self._parent = parent
         self._number = number
         self._name = name
-        self._preview = preview
+        self._preview = preview or name
         self._font = font
         self._size = size
         self._bold = bold
@@ -19,6 +20,8 @@ class Style(object):
         self._children = set()
         if parent:
             parent._children.add(self)
+    def __cmp__(self, other):
+        return cmp(self.preview, other.preview)
     def __setattr__(self, name, value):
         if name.startswith('_'):
             super(Style, self).__setattr__(name, value)
@@ -201,10 +204,7 @@ class Frame(wx.Frame):
         super(Frame, self).__init__(None, -1, 'Test')
         pane = wx.Panel(self, -1)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        root = Style(None, 0, 'Style', 'Style Preview', 
-            'Bitstream Vera Sans Mono', 10, False, False, False, 
-            (0,0,0), (255,255,255))
-        styles = [Style(root) for i in range(30)]
+        styles = create_styles()
         control = Styles(pane, styles)
         control.Bind(wx.EVT_LISTBOX, self.on_style)
         sizer.Add(control, 1, wx.EXPAND|wx.ALL, 8)
@@ -225,41 +225,32 @@ class Frame(wx.Frame):
             style = None
         self.panel.set_style(style)
         
+def create_styles():
+    root = Style(None, 0, 'Style', 'Style Preview', 
+        'Bitstream Vera Sans Mono', 10, False, False, False, 
+        (0,0,0), (255,255,255))
+        
+    python = Style(root)
+    parent = python
+    Style(parent, stc.STC_P_CHARACTER, 'Character')
+    Style(parent, stc.STC_P_CLASSNAME, 'Class Name')
+    Style(parent, stc.STC_P_COMMENTBLOCK, 'Comment Block')
+    Style(parent, stc.STC_P_COMMENTLINE, 'Comment Line')
+    Style(parent, stc.STC_P_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_P_DEFNAME, 'Function Name')
+    Style(parent, stc.STC_P_IDENTIFIER, 'Identifier')
+    Style(parent, stc.STC_P_NUMBER, 'Number')
+    Style(parent, stc.STC_P_OPERATOR, 'Operator')
+    Style(parent, stc.STC_P_STRING, "String 'Example'")
+    Style(parent, stc.STC_P_STRINGEOL, 'String EOL')
+    Style(parent, stc.STC_P_TRIPLE, "String '''Example'''")
+    Style(parent, stc.STC_P_TRIPLEDOUBLE, 'String """Example"""')
+    Style(parent, stc.STC_P_WORD, 'Keyword')
+    return sorted(list(python.children))
+    
 if __name__ == '__main__':
     app = wx.PySimpleApp()
     frame = Frame()
     frame.Show()
     app.MainLoop()
     
-'''
-root = Style(None, 0, 'Style', 'Style Preview', 
-    'Bitstream Vera Sans Mono', 10, False, False, False, 
-    (0,0,0), (255,255,255))
-    
-python = Style(root)
-parent = python
-Style(parent, stc.STC_P_CHARACTER, 'Character')
-Style(parent, stc.STC_P_CLASSNAME, 'Class Name')
-Style(parent, stc.STC_P_COMMENTBLOCK, 'Comment Block')
-Style(parent, stc.STC_P_COMMENTLINE, 'Comment Line')
-Style(parent, stc.STC_P_DEFAULT, 'Whitespace')
-Style(parent, stc.STC_P_DEFNAME, 'Function Name')
-Style(parent, stc.STC_P_IDENTIFIER, 'Identifier')
-Style(parent, stc.STC_P_NUMBER, 'Number')
-Style(parent, stc.STC_P_OPERATOR, 'Operator')
-Style(parent, stc.STC_P_STRING, 'String')
-Style(parent, stc.STC_P_STRINGEOL, 'String EOL')
-Style(parent, stc.STC_P_TRIPLE, 'Single Triple-Quoted String')
-Style(parent, stc.STC_P_TRIPLEDOUBLE, 'Double Triple-Quoted String')
-Style(parent, stc.STC_P_WORD, 'Keyword')
-
-batch = Style(root)
-parent = batch
-Style(parent, stc.STC_BAT_COMMENT, 'Comment')
-Style(parent, stc.STC_BAT_DEFAULT, 'Whitespace')
-Style(parent, stc.STC_BAT_HIDE, 'Hide')
-Style(parent, stc.STC_BAT_IDENTIFIER, 'Identifier')
-Style(parent, stc.STC_BAT_LABEL, 'Label')
-Style(parent, stc.STC_BAT_OPERATOR, 'Operator')
-Style(parent, stc.STC_BAT_WORD, 'Word')
-'''
