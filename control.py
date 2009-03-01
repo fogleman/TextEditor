@@ -61,6 +61,8 @@ class EditorControl(stc.StyledTextCtrl):
         self._edited = False
         self._markers = {}
         self._indic_dirty = [False]*3
+        self._recording = False
+        self._macro = []
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
@@ -70,6 +72,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_updateui)
         self.Bind(stc.EVT_STC_CHARADDED, self.on_charadded)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
+        self.Bind(stc.EVT_STC_MACRORECORD, self.on_macrorecord)
         self.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
     def get_name(self):
         if self.file_path:
@@ -388,6 +391,9 @@ class EditorControl(stc.StyledTextCtrl):
         self.edited = True
     def on_charadded(self, event):
         code = event.GetKey()
+        if self._recording:
+            command = (2170, code, 0)
+            self._macro.append(command)
         if code == ord('\n'): # auto indent
             line = self.GetCurrentLine() - 1
             if line >= 0:
@@ -419,6 +425,51 @@ class EditorControl(stc.StyledTextCtrl):
         self.update_line_numbers()
         self.highlight_selection()
         self.highlight_markers()
+        
+    def toggle_macro(self):
+        if self._recording:
+            self.stop_macro()
+        else:
+            self.start_macro()
+    def start_macro(self):
+        self._recording = True
+        self._macro = []
+        self.StartRecord()
+    def stop_macro(self):
+        self._recording = False
+        self.StopRecord()
+    def play_macro(self):
+        codes = [
+            2011,2013,2176,2177,2178,2179,2180,2300,2301,2302,2303,2304,2305,
+            2306,2307,2308,2309,2310,2311,2312,2313,2314,2315,2316,2317,2318,
+            2319,2320,2321,2322,2323,2324,2325,2326,2327,2328,2329,2330,2331,
+            2332,2333,2334,2335,2336,2337,2338,2339,2404,2340,2341,2342,2343,
+            2344,2345,2346,2347,2348,2349,2450,2451,2452,2453,2454,2455,2390,
+            2391,2392,2393,2395,2396,2413,2414,2415,2416,2426,2427,2428,2429,
+            2430,2431,2432,2433,2434,2435,2436,2437,2438,2439,2440,2441,2442,
+        ]
+        if self._macro:
+            self.BeginUndoAction()
+            for command in self._macro:
+                message, wparam, lparam = command
+                if message == 2170: #SCI_REPLACESEL
+                    self.ReplaceSelection(chr(wparam))
+                elif message == 2366: #SCI_SEARCHANCHOR
+                    self.SearchAnchor()
+                elif message == 2367: #SCI_SEARCHNEXT
+                    #self.SearchNext()
+                    self.find(settings.FIND_TEXT)
+                elif message == 2368: #SCI_SEARCHPREV
+                    #self.SearchPrev()
+                    self.find(settings.FIND_TEXT, previous=True)
+                elif message in codes:
+                    self.CmdKeyExecute(message)
+                else:
+                    print 'Unhandled Code:', message
+            self.EndUndoAction()
+    def on_macrorecord(self, event):
+        command = (event.GetMessage(), event.GetWParam(), event.GetLParam())
+        self._macro.append(command)
         
     def apply_python(self):
         font = util.get_font()
