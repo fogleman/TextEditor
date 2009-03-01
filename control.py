@@ -498,7 +498,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (font, size))
         self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (font, size))
         self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d' % (font, size))
+        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d,fore:grey' % (font, size))
         self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (font, size))
         self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (font, size))
         self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (font, size))

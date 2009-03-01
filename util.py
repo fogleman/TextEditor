@@ -18,17 +18,22 @@ class FontEnumerator(wx.FontEnumerator):
         self.fonts.append(name)
         return True
         
+def get_fonts():
+    fonts = FontEnumerator().fonts
+    fonts.sort()
+    return fonts
+    
 def get_font():
     preferred_fonts = [
         'Bitstream Vera Sans Mono',
         'Courier New',
         'Courier',
     ]
-    enum = FontEnumerator()
+    fonts = get_fonts()
     for font in preferred_fonts:
-        if font in enum.fonts:
+        if font in fonts:
             return font
-    return enum.fonts[0] if enum.fonts else None
+    return fonts[0] if fonts else None
     
 def get_icon(file):
     file = 'icons/%s' % file
