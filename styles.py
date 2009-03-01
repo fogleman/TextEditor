@@ -17,9 +17,9 @@ class Style(object):
         self._underline = underline
         self._foreground = foreground
         self._background = background
-        self._children = set()
+        self._children = []
         if parent:
-            parent._children.add(self)
+            parent._children.append(self)
     def __cmp__(self, other):
         return cmp(self.preview, other.preview)
     def __setattr__(self, name, value):
@@ -34,6 +34,14 @@ class Style(object):
         if value is None and self._parent:
             return getattr(self._parent, name)
         return value
+    def clear(self):
+        self.font = None
+        self.size = None
+        self.bold = None
+        self.italic = None
+        self.underline = None
+        self.foreground = None
+        self.background = None
     def create_font(self):
         return create_font(self.font, self.size, self.bold, self.italic, self.underline)
     def create_foreground(self):
@@ -69,9 +77,9 @@ class StyleEvent(wx.PyEvent):
         
 EVT_STYLE_CHANGED = wx.PyEventBinder(wx.NewEventType())
 
-class StylePanel(wx.Panel):
+class StyleControls(wx.Panel):
     def __init__(self, parent, style=None):
-        super(StylePanel, self).__init__(parent, -1)
+        super(StyleControls, self).__init__(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.create_font_box(), 0, wx.EXPAND)
         sizer.AddSpacer(8)
@@ -169,18 +177,23 @@ class StylePanel(wx.Panel):
         self.background = background
         return sizer
         
-class Styles(wx.VListBox):
-    def __init__(self, parent, styles):
-        super(Styles, self).__init__(parent, -1, style=wx.BORDER_SUNKEN)
-        self.styles = styles
+class StyleListBox(wx.VListBox):
+    def __init__(self, parent, styles=None):
+        super(StyleListBox, self).__init__(parent, -1, style=wx.BORDER_SUNKEN)
         self.pad = 6
         self.SetMinSize((200, 0))
+        self.set_styles(styles)
+    def set_styles(self, styles):
+        styles = styles or []
+        self.styles = styles
         self.SetItemCount(len(styles))
+        self.SetSelection(0 if styles else wx.NOT_FOUND)
     def OnDrawBackground(self, dc, rect, index):
         if self.IsSelected(index):
             p = 3
             x, y, w, h = rect
             x, y, w, h = x+p, y+p, w-p*2, h-p*2
+            dc.SetPen(wx.BLACK_PEN)
             dc.DrawRectangle(x, y, w, h)
     def OnDrawItem(self, dc, rect, index):
         style = self.styles[index]
@@ -192,6 +205,13 @@ class Styles(wx.VListBox):
         x, y, w, h = rect
         x, y = x+p, y+p
         dc.DrawText(style.preview, x, y)
+    def OnDrawSeparator(self, dc, rect, index):
+        if index == 0:
+            dc.SetPen(wx.Pen(wx.Colour(192, 192, 192)))
+            x, y, w, h = rect
+            x1, x2 = x, x+w
+            y1 = y+h-1
+            dc.DrawLine(x1, y1, x2, y1)
     def OnMeasureItem(self, index):
         style = self.styles[index]
         dc = wx.ClientDC(self)
@@ -199,38 +219,46 @@ class Styles(wx.VListBox):
         w, h = dc.GetTextExtent(style.preview)
         return h + self.pad * 2
         
+class StylePanel(wx.Panel):
+    def __init__(self, parent, styles=None):
+        super(StylePanel, self).__init__(parent, -1)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        listbox = StyleListBox(self)
+        listbox.Bind(wx.EVT_LISTBOX, self.on_listbox)
+        sizer.Add(listbox, 1, wx.EXPAND|wx.ALL, 8)
+        controls = StyleControls(self)
+        controls.Bind(EVT_STYLE_CHANGED, self.on_style_changed)
+        sizer.Add(controls, 0, wx.EXPAND|wx.ALL, 8)
+        self.SetSizerAndFit(sizer)
+        self.listbox = listbox
+        self.controls = controls
+        self.set_styles(styles)
+    def set_styles(self, styles):
+        self.listbox.set_styles(styles)
+        self.controls.set_style(styles[0] if styles else None)
+    def on_listbox(self, event):
+        control = self.listbox
+        index = control.GetSelection()
+        style = control.styles[index] if index != wx.NOT_FOUND else None
+        self.controls.set_style(style)
+    def on_style_changed(self, event):
+        self.listbox.Refresh()
+        
+        
+        
 class Frame(wx.Frame):
     def __init__(self):
         super(Frame, self).__init__(None, -1, 'Test')
-        pane = wx.Panel(self, -1)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
         styles = create_styles()
-        control = Styles(pane, styles)
-        control.Bind(wx.EVT_LISTBOX, self.on_style)
-        sizer.Add(control, 1, wx.EXPAND|wx.ALL, 8)
-        panel = StylePanel(pane)
-        panel.Bind(EVT_STYLE_CHANGED, self.on_update)
-        sizer.Add(panel, 0, wx.EXPAND|wx.ALL, 8)
-        pane.SetSizerAndFit(sizer)
-        self.control = control
-        self.panel = panel
+        panel = StylePanel(self, styles)
         self.Fit()
-    def on_update(self, event):
-        self.control.Refresh()
-    def on_style(self, event):
-        index = self.control.GetSelection()
-        if index != wx.NOT_FOUND:
-            style = self.control.styles[index]
-        else:
-            style = None
-        self.panel.set_style(style)
         
 def create_styles():
     root = Style(None, 0, 'Style', 'Style Preview', 
         'Bitstream Vera Sans Mono', 10, False, False, False, 
         (0,0,0), (255,255,255))
         
-    python = Style(root)
+    python = Style(root, -1, 'Python Default')
     parent = python
     Style(parent, stc.STC_P_CHARACTER, 'Character')
     Style(parent, stc.STC_P_CLASSNAME, 'Class Name')
@@ -246,7 +274,7 @@ def create_styles():
     Style(parent, stc.STC_P_TRIPLE, "String '''Example'''")
     Style(parent, stc.STC_P_TRIPLEDOUBLE, 'String """Example"""')
     Style(parent, stc.STC_P_WORD, 'Keyword')
-    return sorted(list(python.children))
+    return [python] + sorted(python.children)
     
 if __name__ == '__main__':
     app = wx.PySimpleApp()
