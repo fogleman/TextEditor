@@ -197,8 +197,9 @@ class Frame(wx.Frame):
         util.menu_item(self, tools, 'Options...', self.on_event, 'cog.png')
         util.menu_item(self, tools, 'Styles...', self.on_event, 'palette.png')
         tools.AppendSeparator()
-        util.menu_item(self, tools, 'Record Macro\tCtrl+Shift+R', self.on_record_macro, 'blank.png')
-        util.menu_item(self, tools, 'Play Macro\tCtrl+Shift+P', self.on_play_macro, 'blank.png')
+        util.menu_item(self, tools, 'Record Macro\tCtrl+Shift+R', self.on_record_macro, 'bullet_red.png')
+        util.menu_item(self, tools, 'Play Macro\tCtrl+Shift+P', self.on_play_macro, 'control_play.png')
+        util.menu_item(self, tools, 'Play Macro to End of File', self.on_play_macro_to_end, 'control_end.png')
         menubar.Append(tools, '&Tools')
         
         help = wx.Menu()
@@ -354,6 +355,8 @@ class Frame(wx.Frame):
         self.get_control().toggle_macro()
     def on_play_macro(self, event):
         self.get_control().play_macro()
+    def on_play_macro_to_end(self, event):
+        self.get_control().play_macro_to_end()
     def on_word_wrap(self, event):
         self.get_control().word_wrap()
     def on_find_next(self, event):

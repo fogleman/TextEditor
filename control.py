@@ -139,8 +139,6 @@ class EditorControl(stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, size+2))
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, size+2))
         
-
-        
         self.apply_bookmark_settings()
         self.apply_folding_settings()
         self.show_line_numbers()
@@ -298,6 +296,10 @@ class EditorControl(stc.StyledTextCtrl):
                 self.SetSelection(index, index)
                 self.SearchAnchor()
                 func = self.SearchPrev if previous else self.SearchNext
+                if self._recording:
+                    code = -2368 if previous else -2367
+                    command = (code, flags, text)
+                    self._macro.append(command)
                 if func(flags, text) >= 0:
                     break
                 if not wrap:
@@ -438,6 +440,26 @@ class EditorControl(stc.StyledTextCtrl):
     def stop_macro(self):
         self._recording = False
         self.StopRecord()
+    def play_macro_to_end(self):
+        if not self._macro:
+            return
+        prev_line = -1
+        count = 0
+        while True:
+            self.play_macro()
+            new_line = self.GetCurrentLine()
+            if new_line == prev_line:
+                count += 1
+                if count > 10:
+                    break
+            else:
+                count = 0
+            prev_line = new_line
+            pos = self.GetCurrentPos()
+            end = self.GetLength()
+            text = self.GetTextRange(pos, end).strip()
+            if not text:
+                break
     def play_macro(self):
         codes = [
             2011,2013,2176,2177,2178,2179,2180,2300,2301,2302,2303,2304,2305,
@@ -456,16 +478,14 @@ class EditorControl(stc.StyledTextCtrl):
                     self.ReplaceSelection(chr(wparam))
                 elif message == 2366: #SCI_SEARCHANCHOR
                     self.SearchAnchor()
-                elif message == 2367: #SCI_SEARCHNEXT
-                    #self.SearchNext()
-                    self.find(settings.FIND_TEXT)
-                elif message == 2368: #SCI_SEARCHPREV
-                    #self.SearchPrev()
-                    self.find(settings.FIND_TEXT, previous=True)
+                elif message == -2367: #SCI_SEARCHNEXT
+                    self.find(flags=wparam, text=lparam)
+                elif message == -2368: #SCI_SEARCHPREV
+                    self.find(flags=wparam, text=lparam, previous=True)
                 elif message in codes:
                     self.CmdKeyExecute(message)
                 else:
-                    print 'Unhandled Code:', message
+                    pass #print 'Unhandled Macro Code:', message
             self.EndUndoAction()
     def on_macrorecord(self, event):
         command = (event.GetMessage(), event.GetWParam(), event.GetLParam())
