@@ -1,5 +1,6 @@
 import wx
 import wx.stc as stc
+import default_styles
 import util
 
 class Style(object):
@@ -35,6 +36,8 @@ class Style(object):
             return getattr(self._parent, name)
         return value
     def clear(self):
+        if self._parent is None:
+            return
         self.font = None
         self.size = None
         self.bold = None
@@ -113,6 +116,7 @@ class StyleControls(wx.Panel):
         style.background = color_tuple(self.background.GetColour())
     def update_controls(self):
         style = self.style
+        if not style: return
         fonts = self.font.GetStrings()
         if style.font in fonts:
             self.font.SetSelection(fonts.index(style.font))
@@ -186,8 +190,22 @@ class StyleListBox(wx.VListBox):
     def set_styles(self, styles):
         styles = styles or []
         self.styles = styles
+        self.Freeze()
         self.SetItemCount(len(styles))
         self.SetSelection(0 if styles else wx.NOT_FOUND)
+        self.Refresh()
+        self.Update()
+        self.Thaw()
+    def reset(self):
+        index = self.GetSelection()
+        if index != wx.NOT_FOUND:
+            style = self.styles[index]
+            style.clear()
+        self.Refresh()
+    def reset_all(self):
+        for style in self.styles:
+            style.clear()
+        self.Refresh()
     def OnDrawBackground(self, dc, rect, index):
         if self.IsSelected(index):
             p = 3
@@ -206,7 +224,7 @@ class StyleListBox(wx.VListBox):
         x, y = x+p, y+p
         dc.DrawText(style.preview, x, y)
     def OnDrawSeparator(self, dc, rect, index):
-        if index == 0:
+        if index == 1:
             dc.SetPen(wx.Pen(wx.Colour(192, 192, 192)))
             x, y, w, h = rect
             x1, x2 = x, x+w
@@ -226,9 +244,13 @@ class StylePanel(wx.Panel):
         listbox = StyleListBox(self)
         listbox.Bind(wx.EVT_LISTBOX, self.on_listbox)
         sizer.Add(listbox, 1, wx.EXPAND|wx.ALL, 8)
+        right = wx.BoxSizer(wx.VERTICAL)
         controls = StyleControls(self)
         controls.Bind(EVT_STYLE_CHANGED, self.on_style_changed)
-        sizer.Add(controls, 0, wx.EXPAND|wx.ALL, 8)
+        right.Add(controls, 0, wx.EXPAND)
+        right.AddSpacer(8)
+        right.Add(self.create_button_box(), 0, wx.EXPAND)
+        sizer.Add(right, 0, wx.EXPAND|wx.ALL, 8)
         self.SetSizerAndFit(sizer)
         self.listbox = listbox
         self.controls = controls
@@ -243,39 +265,69 @@ class StylePanel(wx.Panel):
         self.controls.set_style(style)
     def on_style_changed(self, event):
         self.listbox.Refresh()
+    def on_reset(self, event):
+        self.listbox.reset()
+        self.controls.update_controls()
+    def on_reset_all(self, event):
+        self.listbox.reset_all()
+        self.controls.update_controls()
+    def create_button_box(self):
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.AddStretchSpacer(1)
+        reset = wx.Button(self, -1, 'Reset')
+        reset.Bind(wx.EVT_BUTTON, self.on_reset)
+        sizer.Add(reset)
+        sizer.AddSpacer(8)
+        reset_all = wx.Button(self, -1, 'Reset All')
+        reset_all.Bind(wx.EVT_BUTTON, self.on_reset_all)
+        sizer.Add(reset_all)
+        return sizer
         
-        
+class LanguageStyles(wx.Panel):
+    def __init__(self, parent, root):
+        super(LanguageStyles, self).__init__(parent, -1)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        top = wx.BoxSizer(wx.HORIZONTAL)
+        top.Add(wx.StaticText(self, -1, 'Language'), 0, wx.ALIGN_CENTRE_VERTICAL)
+        top.AddSpacer(4)
+        languages = wx.Choice(self, -1)
+        languages.Bind(wx.EVT_CHOICE, self.on_choice)
+        top.Add(languages)
+        sizer.Add(top, 0, wx.ALL&~wx.BOTTOM, 10)
+        panel = StylePanel(self)
+        sizer.Add(panel, 1, wx.EXPAND)
+        self.SetSizerAndFit(sizer)
+        self.languages = languages
+        self.panel = panel
+        self.set_root(root)
+    def set_root(self, root):
+        self.root = root
+        languages = list(root.children)
+        languages.sort()
+        control = self.languages
+        control.Clear()
+        for language in languages:
+            control.Append(language.name, language)
+        if languages:
+            control.SetSelection(0)
+        self.on_choice(None)
+    def on_choice(self, event):
+        control = self.languages
+        index = control.GetSelection()
+        language = control.GetClientData(index) if index != wx.NOT_FOUND else None
+        styles = list(language.children) if language else []
+        styles.sort()
+        if styles:
+            styles = [self.root, language] + styles
+        self.panel.set_styles(styles)
         
 class Frame(wx.Frame):
     def __init__(self):
         super(Frame, self).__init__(None, -1, 'Test')
-        styles = create_styles()
-        panel = StylePanel(self, styles)
+        root = default_styles.create_style_tree()
+        panel = LanguageStyles(self, root)
         self.Fit()
         
-def create_styles():
-    root = Style(None, 0, 'Style', 'Style Preview', 
-        'Bitstream Vera Sans Mono', 10, False, False, False, 
-        (0,0,0), (255,255,255))
-        
-    python = Style(root, -1, 'Python Default')
-    parent = python
-    Style(parent, stc.STC_P_CHARACTER, 'Character')
-    Style(parent, stc.STC_P_CLASSNAME, 'Class Name')
-    Style(parent, stc.STC_P_COMMENTBLOCK, 'Comment Block')
-    Style(parent, stc.STC_P_COMMENTLINE, 'Comment Line')
-    Style(parent, stc.STC_P_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_P_DEFNAME, 'Function Name')
-    Style(parent, stc.STC_P_IDENTIFIER, 'Identifier')
-    Style(parent, stc.STC_P_NUMBER, 'Number')
-    Style(parent, stc.STC_P_OPERATOR, 'Operator')
-    Style(parent, stc.STC_P_STRING, "String 'Example'")
-    Style(parent, stc.STC_P_STRINGEOL, 'String EOL')
-    Style(parent, stc.STC_P_TRIPLE, "String '''Example'''")
-    Style(parent, stc.STC_P_TRIPLEDOUBLE, 'String """Example"""')
-    Style(parent, stc.STC_P_WORD, 'Keyword')
-    return [python] + sorted(python.children)
-    
 if __name__ == '__main__':
     app = wx.PySimpleApp()
     frame = Frame()
