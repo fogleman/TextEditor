@@ -29,7 +29,7 @@ def create_style_tree():
     parent = asm
     Style(parent, stc.STC_ASM_CHARACTER, 'Character')
     Style(parent, stc.STC_ASM_COMMENT, 'Comment')
-    Style(parent, stc.STC_ASM_COMMENTBLOCK, 'Commentblock')
+    Style(parent, stc.STC_ASM_COMMENTBLOCK, 'Comment Block')
     Style(parent, stc.STC_ASM_CPUINSTRUCTION, 'Cpu Instruction')
     Style(parent, stc.STC_ASM_DEFAULT, 'Whitespace')
     Style(parent, stc.STC_ASM_DIRECTIVE, 'Directive')
@@ -212,7 +212,7 @@ def create_style_tree():
     Style(parent, stc.STC_HA_CAPITAL, 'Capital')
     Style(parent, stc.STC_HA_CHARACTER, 'Character')
     Style(parent, stc.STC_HA_CLASS, 'Class')
-    Style(parent, stc.STC_HA_COMMENTBLOCK, 'Commentblock')
+    Style(parent, stc.STC_HA_COMMENTBLOCK, 'Comment Block')
     Style(parent, stc.STC_HA_COMMENTBLOCK2, 'Commentblock2')
     Style(parent, stc.STC_HA_COMMENTBLOCK3, 'Commentblock3')
     Style(parent, stc.STC_HA_COMMENTLINE, 'Comment Line')
@@ -523,7 +523,7 @@ def create_style_tree():
     parent = p
     Style(parent, stc.STC_P_CHARACTER, 'Character')
     Style(parent, stc.STC_P_CLASSNAME, 'Classname')
-    Style(parent, stc.STC_P_COMMENTBLOCK, 'Commentblock')
+    Style(parent, stc.STC_P_COMMENTBLOCK, 'Comment Block')
     Style(parent, stc.STC_P_COMMENTLINE, 'Comment Line')
     Style(parent, stc.STC_P_DECORATOR, 'Decorator')
     Style(parent, stc.STC_P_DEFAULT, 'Whitespace')
