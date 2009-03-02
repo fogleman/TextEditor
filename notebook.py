@@ -155,6 +155,8 @@ class Notebook(aui.AuiNotebook):
                 if p1 == p2:
                     window.SetFocus()
                     return
+            if not os.path.exists(path):
+                return
         self.Freeze()
         if path:
             self.close_untitled_tab()
