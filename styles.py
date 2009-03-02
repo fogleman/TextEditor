@@ -24,7 +24,7 @@ class StyleManager(object):
     def save_styles(self):
         try:
             file = open(STYLE_PATH, 'wb')
-            pickle.dump(self.styles, file)
+            pickle.dump(self.styles, file, -1)
             file.close()
         except:
             pass
