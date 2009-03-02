@@ -4,12 +4,22 @@ import util
 def create_style_tree():
     from styles import Style
     
-    root = Style(None, -1, 'Global', None, 
+    root = Style(None, -1, 'Global Style', None, 
         util.get_font(), 10, False, False, False, 
         (0,0,0), (255,255,255))
         
+    style = Style(root, 0, name='Application Styles')
+    parent = style
+    Style(parent, stc.STC_STYLE_BRACELIGHT, 'Brace (Matched)')
+    Style(parent, stc.STC_STYLE_BRACEBAD, 'Brace (Unmatched)')
+    #Style(parent, stc.STC_STYLE_CALLTIP, 'Calltip')
+    Style(parent, stc.STC_STYLE_CONTROLCHAR, 'Control Character')
+    Style(parent, stc.STC_STYLE_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_STYLE_INDENTGUIDE, 'Indentation Guides')
+    Style(parent, stc.STC_STYLE_LINENUMBER, 'Line Number Margin')
+    
     # ADA
-    ada = Style(root, name='ADA')
+    ada = Style(root, name='ADA', preview='ADA Base Style')
     parent = ada
     Style(parent, stc.STC_ADA_CHARACTER, 'Character')
     Style(parent, stc.STC_ADA_CHARACTEREOL, 'Character EOL')
@@ -25,7 +35,7 @@ def create_style_tree():
     Style(parent, stc.STC_ADA_WORD, 'Keyword')
 
     # Assembly
-    asm = Style(root, name='Assembly')
+    asm = Style(root, name='Assembly', preview='Assembly Base Style')
     parent = asm
     Style(parent, stc.STC_ASM_CHARACTER, 'Character')
     Style(parent, stc.STC_ASM_COMMENT, 'Comment')
@@ -44,7 +54,7 @@ def create_style_tree():
     Style(parent, stc.STC_ASM_STRINGEOL, 'String EOL')
 
     # Batch
-    bat = Style(root, name='Batch')
+    bat = Style(root, name='Batch', preview='Batch Base Style')
     parent = bat
     Style(parent, stc.STC_BAT_COMMAND, 'Command')
     Style(parent, stc.STC_BAT_COMMENT, 'Comment')
@@ -56,7 +66,7 @@ def create_style_tree():
     Style(parent, stc.STC_BAT_WORD, 'Keyword')
     
     # Caml
-    caml = Style(root, name='Caml')
+    caml = Style(root, name='Caml', preview='Caml Base Style')
     parent = caml
     Style(parent, stc.STC_CAML_CHAR, 'Char')
     Style(parent, stc.STC_CAML_COMMENT, 'Comment')
@@ -75,7 +85,7 @@ def create_style_tree():
     Style(parent, stc.STC_CAML_TAGNAME, 'Tagname')
     
     # Conf
-    conf = Style(root, name='Conf')
+    conf = Style(root, name='Conf', preview='Conf Base Style')
     parent = conf
     Style(parent, stc.STC_CONF_COMMENT, 'Comment')
     Style(parent, stc.STC_CONF_DEFAULT, 'Whitespace')
@@ -89,7 +99,7 @@ def create_style_tree():
     Style(parent, stc.STC_CONF_STRING, 'String')
 
     # CSS
-    css = Style(root, name='CSS')
+    css = Style(root, name='CSS', preview='CSS Base Style')
     parent = css
     Style(parent, stc.STC_CSS_ATTRIBUTE, 'Attribute')
     Style(parent, stc.STC_CSS_CLASS, 'Class')
@@ -108,7 +118,7 @@ def create_style_tree():
     Style(parent, stc.STC_CSS_VALUE, 'Value')
 
     # C++
-    c = Style(root, name='C++')
+    c = Style(root, name='C++', preview='C++ Base Style')
     parent = c
     Style(parent, stc.STC_C_CHARACTER, 'Character')
     Style(parent, stc.STC_C_COMMENT, 'Comment')
@@ -132,7 +142,7 @@ def create_style_tree():
     Style(parent, stc.STC_C_WORD2, 'Keyword 2')
     
     # Diff
-    diff = Style(root, name='Diff')
+    diff = Style(root, name='Diff', preview='Diff Base Style')
     parent = diff
     Style(parent, stc.STC_DIFF_ADDED, 'Added')
     Style(parent, stc.STC_DIFF_COMMAND, 'Command')
@@ -143,7 +153,7 @@ def create_style_tree():
     Style(parent, stc.STC_DIFF_POSITION, 'Position')
     
     # Eiffel
-    eiffel = Style(root, name='Eiffel')
+    eiffel = Style(root, name='Eiffel', preview='Eiffel Base Style')
     parent = eiffel
     Style(parent, stc.STC_EIFFEL_CHARACTER, 'Character')
     Style(parent, stc.STC_EIFFEL_COMMENTLINE, 'Comment Line')
@@ -156,7 +166,7 @@ def create_style_tree():
     Style(parent, stc.STC_EIFFEL_WORD, 'Keyword')
     
     # Erlang
-    erlang = Style(root, name='Erlang')
+    erlang = Style(root, name='Erlang', preview='Erlang Base Style')
     parent = erlang
     Style(parent, stc.STC_ERLANG_ATOM, 'Atom')
     Style(parent, stc.STC_ERLANG_CHARACTER, 'Character')
@@ -173,7 +183,7 @@ def create_style_tree():
     Style(parent, stc.STC_ERLANG_VARIABLE, 'Variable')
     
     # Forth
-    forth = Style(root, name='Forth')
+    forth = Style(root, name='Forth', preview='Forth Base Style')
     parent = forth
     Style(parent, stc.STC_FORTH_COMMENT, 'Comment')
     Style(parent, stc.STC_FORTH_CONTROL, 'Control')
@@ -188,7 +198,7 @@ def create_style_tree():
     Style(parent, stc.STC_FORTH_STRING, 'String')
     
     # Fortran
-    f = Style(root, name='Fortran')
+    f = Style(root, name='Fortran', preview='Fortran Base Style')
     parent = f
     Style(parent, stc.STC_F_COMMENT, 'Comment')
     Style(parent, stc.STC_F_CONTINUATION, 'Continuation')
@@ -207,7 +217,7 @@ def create_style_tree():
     Style(parent, stc.STC_F_WORD3, 'Keyword 3')
     
     # Haskell
-    ha = Style(root, name='Haskell')
+    ha = Style(root, name='Haskell', preview='Haskell Base Style')
     parent = ha
     Style(parent, stc.STC_HA_CAPITAL, 'Capital')
     Style(parent, stc.STC_HA_CHARACTER, 'Character')
@@ -227,32 +237,9 @@ def create_style_tree():
     Style(parent, stc.STC_HA_OPERATOR, 'Operator')
     Style(parent, stc.STC_HA_STRING, 'String')
     
-    # ASP VBScript
-    hba = Style(root, name='ASP VBScript')
-    parent = hba
-    Style(parent, stc.STC_HBA_COMMENTLINE, 'Comment Line')
-    Style(parent, stc.STC_HBA_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_HBA_IDENTIFIER, 'Identifier')
-    Style(parent, stc.STC_HBA_NUMBER, 'Number')
-    Style(parent, stc.STC_HBA_START, 'Start')
-    Style(parent, stc.STC_HBA_STRING, 'String')
-    Style(parent, stc.STC_HBA_STRINGEOL, 'String EOL')
-    Style(parent, stc.STC_HBA_WORD, 'Keyword')
-    
-    # VBScript
-    hb = Style(root, name='VBScript')
-    parent = hb
-    Style(parent, stc.STC_HB_COMMENTLINE, 'Comment Line')
-    Style(parent, stc.STC_HB_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_HB_IDENTIFIER, 'Identifier')
-    Style(parent, stc.STC_HB_NUMBER, 'Number')
-    Style(parent, stc.STC_HB_START, 'Start')
-    Style(parent, stc.STC_HB_STRING, 'String')
-    Style(parent, stc.STC_HB_STRINGEOL, 'String EOL')
-    Style(parent, stc.STC_HB_WORD, 'Keyword')
-    
-    # JavaScript
-    hja = Style(root, name='JavaScript')
+    '''
+    # ASP JavaScript
+    hja = Style(root, name='JavaScript', preview='ASP JavaScript Base Style')
     parent = hja
     Style(parent, stc.STC_HJA_COMMENT, 'Comment')
     Style(parent, stc.STC_HJA_COMMENTDOC, 'Commentdoc')
@@ -268,25 +255,20 @@ def create_style_tree():
     Style(parent, stc.STC_HJA_SYMBOLS, 'Symbols')
     Style(parent, stc.STC_HJA_WORD, 'Keyword')
     
-    # JavaScript
-    hj = Style(root, name='JavaScript')
-    parent = hj
-    Style(parent, stc.STC_HJ_COMMENT, 'Comment')
-    Style(parent, stc.STC_HJ_COMMENTDOC, 'Commentdoc')
-    Style(parent, stc.STC_HJ_COMMENTLINE, 'Comment Line')
-    Style(parent, stc.STC_HJ_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_HJ_DOUBLESTRING, 'Doublestring')
-    Style(parent, stc.STC_HJ_KEYWORD, 'Keyword')
-    Style(parent, stc.STC_HJ_NUMBER, 'Number')
-    Style(parent, stc.STC_HJ_REGEX, 'Regex')
-    Style(parent, stc.STC_HJ_SINGLESTRING, 'Singlestring')
-    Style(parent, stc.STC_HJ_START, 'Start')
-    Style(parent, stc.STC_HJ_STRINGEOL, 'String EOL')
-    Style(parent, stc.STC_HJ_SYMBOLS, 'Symbols')
-    Style(parent, stc.STC_HJ_WORD, 'Keyword')
+    # ASP VBScript
+    hba = Style(root, name='ASP VBScript', preview='ASP VBScript Base Style')
+    parent = hba
+    Style(parent, stc.STC_HBA_COMMENTLINE, 'Comment Line')
+    Style(parent, stc.STC_HBA_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_HBA_IDENTIFIER, 'Identifier')
+    Style(parent, stc.STC_HBA_NUMBER, 'Number')
+    Style(parent, stc.STC_HBA_START, 'Start')
+    Style(parent, stc.STC_HBA_STRING, 'String')
+    Style(parent, stc.STC_HBA_STRINGEOL, 'String EOL')
+    Style(parent, stc.STC_HBA_WORD, 'Keyword')
     
     # ASP Python
-    hpa = Style(root, name='ASP Python')
+    hpa = Style(root, name='ASP Python', preview='ASP Python Base Style')
     parent = hpa
     Style(parent, stc.STC_HPA_CHARACTER, 'Character')
     Style(parent, stc.STC_HPA_CLASSNAME, 'Classname')
@@ -302,21 +284,8 @@ def create_style_tree():
     Style(parent, stc.STC_HPA_TRIPLEDOUBLE, 'Tripledouble')
     Style(parent, stc.STC_HPA_WORD, 'Keyword')
     
-    # PHP
-    hphp = Style(root, name='PHP')
-    parent = hphp
-    Style(parent, stc.STC_HPHP_COMMENT, 'Comment')
-    Style(parent, stc.STC_HPHP_COMMENTLINE, 'Comment Line')
-    Style(parent, stc.STC_HPHP_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_HPHP_HSTRING, 'Hstring')
-    Style(parent, stc.STC_HPHP_NUMBER, 'Number')
-    Style(parent, stc.STC_HPHP_OPERATOR, 'Operator')
-    Style(parent, stc.STC_HPHP_SIMPLESTRING, 'Simplestring')
-    Style(parent, stc.STC_HPHP_VARIABLE, 'Variable')
-    Style(parent, stc.STC_HPHP_WORD, 'Keyword')
-    
     # HTML Python
-    hp = Style(root, name='HTML Python')
+    hp = Style(root, name='HTML Python', preview='HTML Python Base Style')
     parent = hp
     Style(parent, stc.STC_HP_CHARACTER, 'Character')
     Style(parent, stc.STC_HP_CLASSNAME, 'Classname')
@@ -331,9 +300,52 @@ def create_style_tree():
     Style(parent, stc.STC_HP_TRIPLE, 'Triple')
     Style(parent, stc.STC_HP_TRIPLEDOUBLE, 'Tripledouble')
     Style(parent, stc.STC_HP_WORD, 'Keyword')
+    '''
+    
+    # HTML VBScript
+    hb = Style(root, name='HTML VBScript', preview='HTML VBScript Base Style')
+    parent = hb
+    Style(parent, stc.STC_HB_COMMENTLINE, 'Comment Line')
+    Style(parent, stc.STC_HB_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_HB_IDENTIFIER, 'Identifier')
+    Style(parent, stc.STC_HB_NUMBER, 'Number')
+    Style(parent, stc.STC_HB_START, 'Start')
+    Style(parent, stc.STC_HB_STRING, 'String')
+    Style(parent, stc.STC_HB_STRINGEOL, 'String EOL')
+    Style(parent, stc.STC_HB_WORD, 'Keyword')
+    
+    # HTML JavaScript
+    hj = Style(root, name='HTML JavaScript', preview='HTML JavaScript Base Style')
+    parent = hj
+    Style(parent, stc.STC_HJ_COMMENT, 'Comment')
+    Style(parent, stc.STC_HJ_COMMENTDOC, 'Commentdoc')
+    Style(parent, stc.STC_HJ_COMMENTLINE, 'Comment Line')
+    Style(parent, stc.STC_HJ_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_HJ_DOUBLESTRING, 'Doublestring')
+    Style(parent, stc.STC_HJ_KEYWORD, 'Keyword')
+    Style(parent, stc.STC_HJ_NUMBER, 'Number')
+    Style(parent, stc.STC_HJ_REGEX, 'Regex')
+    Style(parent, stc.STC_HJ_SINGLESTRING, 'Singlestring')
+    Style(parent, stc.STC_HJ_START, 'Start')
+    Style(parent, stc.STC_HJ_STRINGEOL, 'String EOL')
+    Style(parent, stc.STC_HJ_SYMBOLS, 'Symbols')
+    Style(parent, stc.STC_HJ_WORD, 'Keyword')
+    
+    # PHP
+    hphp = Style(root, name='PHP', preview='PHP Base Style')
+    parent = hphp
+    Style(parent, stc.STC_HPHP_COMMENT, 'Comment')
+    Style(parent, stc.STC_HPHP_COMMENTLINE, 'Comment Line')
+    Style(parent, stc.STC_HPHP_DEFAULT, 'Whitespace')
+    Style(parent, stc.STC_HPHP_HSTRING, 'Hstring')
+    Style(parent, stc.STC_HPHP_NUMBER, 'Number')
+    Style(parent, stc.STC_HPHP_OPERATOR, 'Operator')
+    Style(parent, stc.STC_HPHP_SIMPLESTRING, 'Simplestring')
+    Style(parent, stc.STC_HPHP_VARIABLE, 'Variable')
+    Style(parent, stc.STC_HPHP_WORD, 'Keyword')
     
     # HTML
-    h = Style(root, name='HTML')
+    h = Style(root, name='HTML', preview='HTML Base Style')
     parent = h
     Style(parent, stc.STC_H_ASP, 'Asp')
     Style(parent, stc.STC_H_ASPAT, 'Aspat')
@@ -358,7 +370,7 @@ def create_style_tree():
     Style(parent, stc.STC_H_XMLSTART, 'Xmlstart')
     
     # InnoSetup
-    inno = Style(root, name='InnoSetup')
+    inno = Style(root, name='InnoSetup', preview='InnoSetup Base Style')
     parent = inno
     Style(parent, stc.STC_INNO_COMMENT, 'Comment')
     Style(parent, stc.STC_INNO_DEFAULT, 'Whitespace')
@@ -369,7 +381,7 @@ def create_style_tree():
     Style(parent, stc.STC_INNO_SECTION, 'Section')
     
     # Lisp
-    lisp = Style(root, name='Lisp')
+    lisp = Style(root, name='Lisp', preview='Lisp Base Style')
     parent = lisp
     Style(parent, stc.STC_LISP_COMMENT, 'Comment')
     Style(parent, stc.STC_LISP_DEFAULT, 'Whitespace')
@@ -383,7 +395,7 @@ def create_style_tree():
     Style(parent, stc.STC_LISP_SYMBOL, 'Symbol')
     
     # Lua
-    lua = Style(root, name='Lua')
+    lua = Style(root, name='Lua', preview='Lua Base Style')
     parent = lua
     Style(parent, stc.STC_LUA_CHARACTER, 'Character')
     Style(parent, stc.STC_LUA_COMMENT, 'Comment')
@@ -407,7 +419,7 @@ def create_style_tree():
     Style(parent, stc.STC_LUA_WORD8, 'Word8')
     
     # Makefile
-    make = Style(root, name='Makefile')
+    make = Style(root, name='Makefile', preview='Makefile Base Style')
     parent = make
     Style(parent, stc.STC_MAKE_COMMENT, 'Comment')
     Style(parent, stc.STC_MAKE_DEFAULT, 'Whitespace')
@@ -418,7 +430,7 @@ def create_style_tree():
     Style(parent, stc.STC_MAKE_TARGET, 'Target')
     
     # MATLAB
-    matlab = Style(root, name='MATLAB')
+    matlab = Style(root, name='MATLAB', preview='MATLAB Base Style')
     parent = matlab
     Style(parent, stc.STC_MATLAB_COMMAND, 'Command')
     Style(parent, stc.STC_MATLAB_COMMENT, 'Comment')
@@ -431,7 +443,7 @@ def create_style_tree():
     Style(parent, stc.STC_MATLAB_STRING, 'String')
     
     # MSSQL
-    mssql = Style(root, name='MSSQL')
+    mssql = Style(root, name='MSSQL', preview='MSSQL Base Style')
     parent = mssql
     Style(parent, stc.STC_MSSQL_COMMENT, 'Comment')
     Style(parent, stc.STC_MSSQL_DATATYPE, 'Datatype')
@@ -446,7 +458,7 @@ def create_style_tree():
     Style(parent, stc.STC_MSSQL_VARIABLE, 'Variable')
     
     # Crontab
-    nncrontab = Style(root, name='Crontab')
+    nncrontab = Style(root, name='Crontab', preview='Crontab Base Style')
     parent = nncrontab
     Style(parent, stc.STC_NNCRONTAB_ASTERISK, 'Asterisk')
     Style(parent, stc.STC_NNCRONTAB_COMMENT, 'Comment')
@@ -461,7 +473,7 @@ def create_style_tree():
     Style(parent, stc.STC_NNCRONTAB_TASK, 'Task')
     
     # NSIS
-    nsis = Style(root, name='NSIS')
+    nsis = Style(root, name='NSIS', preview='NSIS Base Style')
     parent = nsis
     Style(parent, stc.STC_NSIS_COMMENT, 'Comment')
     Style(parent, stc.STC_NSIS_COMMENTBOX, 'Commentbox')
@@ -484,7 +496,7 @@ def create_style_tree():
     Style(parent, stc.STC_NSIS_VARIABLE, 'Variable')
     
     # Perl
-    pl = Style(root, name='Perl')
+    pl = Style(root, name='Perl', preview='Perl Base Style')
     parent = pl
     Style(parent, stc.STC_PL_ARRAY, 'Array')
     Style(parent, stc.STC_PL_BACKTICKS, 'Backticks')
@@ -509,7 +521,7 @@ def create_style_tree():
     Style(parent, stc.STC_PL_WORD, 'Keyword')
     
     # Properties
-    props = Style(root, name='Properties')
+    props = Style(root, name='Properties', preview='Properties Base Style')
     parent = props
     Style(parent, stc.STC_PROPS_ASSIGNMENT, 'Assignment')
     Style(parent, stc.STC_PROPS_COMMENT, 'Comment')
@@ -519,7 +531,7 @@ def create_style_tree():
     Style(parent, stc.STC_PROPS_SECTION, 'Section')
     
     # Python
-    p = Style(root, name='Python')
+    p = Style(root, name='Python', preview='Python Base Style')
     parent = p
     Style(parent, stc.STC_P_CHARACTER, 'Character')
     Style(parent, stc.STC_P_CLASSNAME, 'Classname')
@@ -539,7 +551,7 @@ def create_style_tree():
     Style(parent, stc.STC_P_WORD2, 'Keyword 2')
     
     # Ruby
-    rb = Style(root, name='Ruby')
+    rb = Style(root, name='Ruby', preview='Ruby Base Style')
     parent = rb
     Style(parent, stc.STC_RB_BACKTICKS, 'Backticks')
     Style(parent, stc.STC_RB_CHARACTER, 'Character')
@@ -563,7 +575,7 @@ def create_style_tree():
     Style(parent, stc.STC_RB_WORD, 'Keyword')
     
     # SH
-    sh = Style(root, name='SH')
+    sh = Style(root, name='SH', preview='SH Base Style')
     parent = sh
     Style(parent, stc.STC_SH_BACKTICKS, 'Backticks')
     Style(parent, stc.STC_SH_CHARACTER, 'Character')
@@ -579,7 +591,7 @@ def create_style_tree():
     Style(parent, stc.STC_SH_WORD, 'Keyword')
     
     # SQL
-    sql = Style(root, name='SQL')
+    sql = Style(root, name='SQL', preview='SQL Base Style')
     parent = sql
     Style(parent, stc.STC_SQL_CHARACTER, 'Character')
     Style(parent, stc.STC_SQL_COMMENT, 'Comment')
@@ -602,22 +614,8 @@ def create_style_tree():
     Style(parent, stc.STC_SQL_WORD, 'Keyword')
     Style(parent, stc.STC_SQL_WORD2, 'Keyword 2')
     
-    '''
-    style = Style(root)
-    parent = style
-    Style(parent, stc.STC_STYLE_BRACEBAD, 'Bracebad')
-    Style(parent, stc.STC_STYLE_BRACELIGHT, 'Bracelight')
-    Style(parent, stc.STC_STYLE_CALLTIP, 'Calltip')
-    Style(parent, stc.STC_STYLE_CONTROLCHAR, 'Controlchar')
-    Style(parent, stc.STC_STYLE_DEFAULT, 'Whitespace')
-    Style(parent, stc.STC_STYLE_INDENTGUIDE, 'Indentguide')
-    Style(parent, stc.STC_STYLE_LASTPREDEFINED, 'Lastpredefined')
-    Style(parent, stc.STC_STYLE_LINENUMBER, 'Linenumber')
-    Style(parent, stc.STC_STYLE_MAX, 'Max')
-    '''
-    
     # Tcl
-    tcl = Style(root, name='Tcl')
+    tcl = Style(root, name='Tcl', preview='Tcl Base Style')
     parent = tcl
     Style(parent, stc.STC_TCL_COMMENT, 'Comment')
     Style(parent, stc.STC_TCL_COMMENTLINE, 'Comment Line')
@@ -638,7 +636,7 @@ def create_style_tree():
     Style(parent, stc.STC_TCL_WORD8, 'Word8')
     
     # TeX
-    tex = Style(root, name='TeX')
+    tex = Style(root, name='TeX', preview='TeX Base Style')
     parent = tex
     Style(parent, stc.STC_TEX_COMMAND, 'Command')
     Style(parent, stc.STC_TEX_DEFAULT, 'Whitespace')
@@ -648,7 +646,7 @@ def create_style_tree():
     Style(parent, stc.STC_TEX_TEXT, 'Text')
     
     # VHDL
-    vhdl = Style(root, name='VHDL')
+    vhdl = Style(root, name='VHDL', preview='VHDL Base Style')
     parent = vhdl
     Style(parent, stc.STC_VHDL_ATTRIBUTE, 'Attribute')
     Style(parent, stc.STC_VHDL_COMMENT, 'Comment')
@@ -667,7 +665,7 @@ def create_style_tree():
     Style(parent, stc.STC_VHDL_USERWORD, 'Userword')
     
     # Verilog
-    v = Style(root, name='Verilog')
+    v = Style(root, name='Verilog', preview='Verilog Base Style')
     parent = v
     Style(parent, stc.STC_V_COMMENT, 'Comment')
     Style(parent, stc.STC_V_COMMENTLINE, 'Comment Line')
@@ -685,7 +683,7 @@ def create_style_tree():
     Style(parent, stc.STC_V_WORD3, 'Keyword 3')
     
     # YAML
-    yaml = Style(root, name='YAML')
+    yaml = Style(root, name='YAML', preview='YAML Base Style')
     parent = yaml
     Style(parent, stc.STC_YAML_COMMENT, 'Comment')
     Style(parent, stc.STC_YAML_DEFAULT, 'Whitespace')

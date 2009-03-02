@@ -1,8 +1,34 @@
 import wx
 import wx.stc as stc
+import copy
+import pickle
 import default_styles
 import util
 
+STYLE_PATH = 'styles.dat'
+
+class StyleManager(object):
+    instance = None
+    def __init__(self):
+        assert StyleManager.instance is None
+        StyleManager.instance = self
+        self.init()
+    def init(self):
+        try:
+            file = open(STYLE_PATH, 'rb')
+            styles = pickle.load(file)
+            file.close()
+        except:
+            styles = default_styles.create_style_tree()
+        self.styles = styles
+    def save_styles(self):
+        try:
+            file = open(STYLE_PATH, 'wb')
+            pickle.dump(self.styles, file)
+            file.close()
+        except:
+            pass
+            
 class Style(object):
     def __init__(self, parent=None, number=None, name=None, preview=None, 
         font=None, size=None, bold=None, italic=None, underline=None, 
@@ -45,6 +71,11 @@ class Style(object):
         self.underline = None
         self.foreground = None
         self.background = None
+    def get_child(self, number):
+        for child in self._children:
+            if child.number == number:
+                return child
+        return None
     def create_font(self):
         return create_font(self.font, self.size, self.bold, self.italic, self.underline)
     def create_foreground(self):
@@ -103,7 +134,15 @@ class StyleControls(wx.Panel):
         for control in self.controls:
             control.Enable(enable)
     def on_event(self, event):
-        self.update_style()
+        style = self.style
+        object = event.GetEventObject()
+        if object == self.font: style.font = self.font.GetStringSelection()
+        if object == self.size: style.size = self.size.GetValue()
+        if object == self.bold: style.bold = self.bold.GetValue()
+        if object == self.italic: style.italic = self.italic.GetValue()
+        if object == self.underline: style.underline = self.underline.GetValue()
+        if object == self.foreground: style.foreground = color_tuple(self.foreground.GetColour())
+        if object == self.background: style.background = color_tuple(self.background.GetColour())
         wx.PostEvent(self, StyleEvent(self, EVT_STYLE_CHANGED))
     def update_style(self):
         style = self.style
@@ -224,7 +263,7 @@ class StyleListBox(wx.VListBox):
         x, y = x+p, y+p
         dc.DrawText(style.preview, x, y)
     def OnDrawSeparator(self, dc, rect, index):
-        if index == 1:
+        if False:
             dc.SetPen(wx.Pen(wx.Colour(192, 192, 192)))
             x, y, w, h = rect
             x1, x2 = x, x+w
@@ -243,14 +282,15 @@ class StylePanel(wx.Panel):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         listbox = StyleListBox(self)
         listbox.Bind(wx.EVT_LISTBOX, self.on_listbox)
-        sizer.Add(listbox, 1, wx.EXPAND|wx.ALL, 8)
+        sizer.Add(listbox, 1, wx.EXPAND)
+        sizer.AddSpacer(10)
         right = wx.BoxSizer(wx.VERTICAL)
         controls = StyleControls(self)
         controls.Bind(EVT_STYLE_CHANGED, self.on_style_changed)
         right.Add(controls, 0, wx.EXPAND)
         right.AddSpacer(8)
         right.Add(self.create_button_box(), 0, wx.EXPAND)
-        sizer.Add(right, 0, wx.EXPAND|wx.ALL, 8)
+        sizer.Add(right, 0, wx.EXPAND)
         self.SetSizerAndFit(sizer)
         self.listbox = listbox
         self.controls = controls
@@ -258,6 +298,8 @@ class StylePanel(wx.Panel):
     def set_styles(self, styles):
         self.listbox.set_styles(styles)
         self.controls.set_style(styles[0] if styles else None)
+    def update_controls(self):
+        self.controls.update_controls()
     def on_listbox(self, event):
         control = self.listbox
         index = control.GetSelection()
@@ -288,12 +330,16 @@ class LanguageStyles(wx.Panel):
         super(LanguageStyles, self).__init__(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         top = wx.BoxSizer(wx.HORIZONTAL)
-        top.Add(wx.StaticText(self, -1, 'Language'), 0, wx.ALIGN_CENTRE_VERTICAL)
+        top.Add(wx.StaticText(self, -1, 'Language:'), 0, wx.ALIGN_CENTRE_VERTICAL)
         top.AddSpacer(4)
         languages = wx.Choice(self, -1)
         languages.Bind(wx.EVT_CHOICE, self.on_choice)
         top.Add(languages)
-        sizer.Add(top, 0, wx.ALL&~wx.BOTTOM, 10)
+        top.AddSpacer(4)
+        line = wx.StaticLine(self, -1, size=(0,2), style=wx.LI_HORIZONTAL)
+        top.Add(line, 1, wx.ALIGN_CENTRE_VERTICAL)
+        sizer.Add(top, 0, wx.EXPAND)
+        sizer.AddSpacer(8)
         panel = StylePanel(self)
         sizer.Add(panel, 1, wx.EXPAND)
         self.SetSizerAndFit(sizer)
@@ -311,6 +357,8 @@ class LanguageStyles(wx.Panel):
         if languages:
             control.SetSelection(0)
         self.on_choice(None)
+    def update_controls(self):
+        self.panel.controls.update_controls()
     def on_choice(self, event):
         control = self.languages
         index = control.GetSelection()
@@ -318,19 +366,91 @@ class LanguageStyles(wx.Panel):
         styles = list(language.children) if language else []
         styles.sort()
         if styles:
-            styles = [self.root, language] + styles
+            styles = [language] + styles
         self.panel.set_styles(styles)
         
-class Frame(wx.Frame):
-    def __init__(self):
-        super(Frame, self).__init__(None, -1, 'Test')
-        root = default_styles.create_style_tree()
-        panel = LanguageStyles(self, root)
-        self.Fit()
+class StyleDialog(wx.Dialog):
+    def __init__(self, parent):
+        super(StyleDialog, self).__init__(parent, -1, 'Style Configuration')
+        styles = StyleManager.instance.styles
+        self.styles = copy.deepcopy(styles)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        notebook = wx.Notebook(self, -1)
+        notebook.AddPage(self.create_global_page(notebook), 'Global Style')
+        notebook.AddPage(self.create_app_page(notebook), 'Application Styles')
+        notebook.AddPage(self.create_language_page(notebook), 'Language Styles')
+        sizer.Add(notebook, 1, wx.EXPAND|wx.ALL, 8)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer(1)
+        ok = wx.Button(self, wx.ID_OK, 'OK')
+        ok.Bind(wx.EVT_BUTTON, self.on_apply)
+        cancel = wx.Button(self, wx.ID_CANCEL, 'Cancel')
+        apply = wx.Button(self, wx.ID_APPLY, 'Apply')
+        apply.Disable()
+        apply.Bind(wx.EVT_BUTTON, self.on_apply)
+        buttons.Add(ok, 0, wx.LEFT, 5)
+        buttons.Add(cancel, 0, wx.LEFT, 5)
+        buttons.Add(apply, 0, wx.LEFT, 5)
+        sizer.Add(buttons, 0, wx.EXPAND|wx.ALL&~wx.TOP, 8)
+        self.SetSizerAndFit(sizer)
+        self.apply = apply
+    def on_change(self, event):
+        event.Skip()
+        self.apply.Enable()
+    def on_global_change(self, event):
+        self.on_change(event)
+        self.app_controls.update_controls()
+        self.language_controls.update_controls()
+    def on_app_change(self, event):
+        self.on_change(event)
+        self.global_controls.update_controls()
+        self.language_controls.update_controls()
+    def on_language_change(self, event):
+        self.on_change(event)
+        self.global_controls.update_controls()
+        self.app_controls.update_controls()
+    def on_apply(self, event):
+        event.Skip()
+        self.apply.Disable()
+        StyleManager.instance.styles = copy.deepcopy(self.styles)
+        StyleManager.instance.save_styles()
+    def create_global_page(self, parent):
+        page = wx.Panel(parent, -1)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        controls = StyleControls(page, self.styles)
+        controls.Bind(EVT_STYLE_CHANGED, self.on_global_change)
+        sizer.Add(controls, 1, wx.EXPAND|wx.ALL, 10)
+        page.SetSizer(sizer)
+        self.global_controls = controls
+        return page
+    def create_app_page(self, parent):
+        page = wx.Panel(parent, -1)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        styles = list(self.styles.get_child(0).children)
+        controls = StylePanel(page, styles)
+        controls.controls.Bind(EVT_STYLE_CHANGED, self.on_app_change)
+        sizer.Add(controls, 1, wx.EXPAND|wx.ALL, 10)
+        page.SetSizer(sizer)
+        self.app_controls = controls
+        return page
+    def create_language_page(self, parent):
+        page = wx.Panel(parent, -1)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        styles = self.styles
+        controls = LanguageStyles(page, styles)
+        controls.panel.controls.Bind(EVT_STYLE_CHANGED, self.on_language_change)
+        sizer.Add(controls, 1, wx.EXPAND|wx.ALL, 10)
+        page.SetSizer(sizer)
+        self.language_controls = controls
+        return page
+        
+        
         
 if __name__ == '__main__':
     app = wx.PySimpleApp()
-    frame = Frame()
-    frame.Show()
+    StyleManager()
+    dialog = StyleDialog(None)
+    dialog.ShowModal()
+    dialog.Destroy()
     app.MainLoop()
     
