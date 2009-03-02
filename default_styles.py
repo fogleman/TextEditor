@@ -4,7 +4,7 @@ import util
 def create_style_tree():
     from styles import Style
     
-    root = Style(None, -1, 'Global Style', None, 
+    root = Style(None, stc.STC_STYLE_DEFAULT, 'Global Style', None, 
         util.get_font(), 10, False, False, False, 
         (0,0,0), (255,255,255))
         
@@ -118,7 +118,7 @@ def create_style_tree():
     Style(parent, stc.STC_CSS_VALUE, 'Value')
 
     # C++
-    c = Style(root, name='C++', preview='C++ Base Style')
+    c = Style(root, name='CPP', preview='C++ Base Style')
     parent = c
     Style(parent, stc.STC_C_CHARACTER, 'Character')
     Style(parent, stc.STC_C_COMMENT, 'Comment')

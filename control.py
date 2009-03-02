@@ -2,6 +2,7 @@ import wx
 import wx.stc as stc
 import os
 import util
+import styles
 from settings import settings
 
 EXTENSIONS = {
@@ -74,6 +75,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
         self.Bind(stc.EVT_STC_MACRORECORD, self.on_macrorecord)
         self.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
+        self.detect_language()
     def get_name(self):
         if self.file_path:
             pre, name = os.path.split(self.file_path)
@@ -133,12 +135,6 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetViewWhiteSpace(settings.VIEW_WHITESPACE)
         self.SetMargins(settings.MARGIN_LEFT, settings.MARGIN_RIGHT)
         
-        font = util.get_font()
-        size = settings.FONT_SIZE
-        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, size+2))
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, size+2))
-        
         self.apply_bookmark_settings()
         self.apply_folding_settings()
         self.show_line_numbers()
@@ -196,7 +192,6 @@ class EditorControl(stc.StyledTextCtrl):
             if file:
                 file.close()
             self.mark_stat()
-            self.Colourise(0, self.GetLength())
     def save_file(self, path=None, force=False):
         path = path or self.file_path
         if not path:
@@ -216,7 +211,6 @@ class EditorControl(stc.StyledTextCtrl):
             if file:
                 file.close()
             self.mark_stat()
-            self.Colourise(0, self.GetLength())
         return False
     def reload_file(self):
         if self.file_path:
@@ -225,6 +219,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.ClearDocumentStyle()
         self.SetKeyWords(0, '')
         self.SetLexer(stc.STC_LEX_NULL)
+        language = ''
         path = self.file_path
         if path:
             pre, ext = os.path.splitext(path)
@@ -235,10 +230,28 @@ class EditorControl(stc.StyledTextCtrl):
                 if language in KEYWORDS:
                     keywords = KEYWORDS[language]
                     self.SetKeyWords(0, ' '.join(keywords.split()))
-                if language == 'python':
-                    self.apply_python()
-                if language == 'cpp':
-                    self.apply_cpp()
+        self.update_styles(language)
+        self.Colourise(0, self.GetLength())
+    def update_styles(self, language):
+        self.StyleResetDefault()
+        self.StyleClearAll()
+        manager = styles.StyleManager.instance
+        language_styles = manager.styles.get_child_by_name(language)
+        if language_styles:
+            self.apply_styles(language_styles)
+        else:
+            self.apply_style(manager.styles)
+            self.StyleClearAll()
+        app_styles = manager.styles.get_child(0)
+        self.apply_styles(app_styles)
+    def apply_styles(self, styles):
+        for style in styles._children:
+            self.apply_style(style)
+    def apply_style(self, style):
+        number = style.number
+        self.StyleSetFontAttr(number, style.size, style.font, style.bold, style.italic, style.underline)
+        self.StyleSetBackground(number, style.background)
+        self.StyleSetForeground(number, style.foreground)
     def match_brace(self):
         invalid = stc.STC_INVALID_POSITION
         if settings.MATCH_BRACES:
