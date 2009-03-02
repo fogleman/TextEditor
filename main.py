@@ -14,6 +14,10 @@ def activate_psyco():
     except:
         pass
         
+def load_styles():
+    import styles
+    styles.StyleManager()
+    
 def run():
     import wx
     import frame
@@ -24,6 +28,7 @@ def run():
     app = wx.PySimpleApp()
     container, message = ipc.init()
     if container:
+        load_styles()
         window = frame.Frame()
         container.callback = window.parse_args
         container(message)

@@ -7,6 +7,7 @@ import notebook
 import util
 import find
 import about
+import styles
 from settings import settings
 
 class Frame(wx.Frame):
@@ -195,7 +196,7 @@ class Frame(wx.Frame):
         
         tools = wx.Menu()
         util.menu_item(self, tools, 'Options...', self.on_event, 'cog.png')
-        util.menu_item(self, tools, 'Styles...', self.on_event, 'palette.png')
+        util.menu_item(self, tools, 'Fonts && Colors...', self.on_styles, 'palette.png')
         tools.AppendSeparator()
         util.menu_item(self, tools, 'Record Macro\tCtrl+Shift+R', self.on_record_macro, 'bullet_red.png')
         util.menu_item(self, tools, 'Play Macro\tCtrl+Shift+P', self.on_play_macro, 'control_play.png')
@@ -351,6 +352,10 @@ class Frame(wx.Frame):
         if path:
             proc = 'explorer.exe /select,"%s"' % path
             wx.Execute(proc)
+    def on_styles(self, event):
+        dialog = styles.StyleDialog(self)
+        dialog.Centre()
+        dialog.ShowModal()
     def on_record_macro(self, event):
         self.get_control().toggle_macro()
     def on_play_macro(self, event):
