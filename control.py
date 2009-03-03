@@ -67,6 +67,7 @@ class EditorControl(stc.StyledTextCtrl):
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
+        self.detect_language()
         self.SetEOLMode(stc.STC_EOL_LF)
         self.SetModEventMask(stc.STC_MOD_INSERTTEXT | stc.STC_MOD_DELETETEXT | stc.STC_PERFORMED_USER | stc.STC_PERFORMED_UNDO | stc.STC_PERFORMED_REDO)
         self.Bind(stc.EVT_STC_CHANGE, self.on_change)
@@ -75,7 +76,6 @@ class EditorControl(stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_MARGINCLICK, self.on_marginclick)
         self.Bind(stc.EVT_STC_MACRORECORD, self.on_macrorecord)
         self.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
-        self.detect_language()
     def get_name(self):
         if self.file_path:
             pre, name = os.path.split(self.file_path)
@@ -233,15 +233,12 @@ class EditorControl(stc.StyledTextCtrl):
         self.update_styles(language)
         self.Colourise(0, self.GetLength())
     def update_styles(self, language):
-        self.StyleResetDefault()
-        self.StyleClearAll()
         manager = styles.StyleManager.instance
+        self.apply_style(manager.styles)
+        self.StyleClearAll()
         language_styles = manager.styles.get_child_by_name(language)
         if language_styles:
             self.apply_styles(language_styles)
-        else:
-            self.apply_style(manager.styles)
-            self.StyleClearAll()
         app_styles = manager.styles.get_child(0)
         self.apply_styles(app_styles)
     def apply_styles(self, styles):

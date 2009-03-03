@@ -18,6 +18,19 @@ def create_style_tree():
     Style(parent, stc.STC_STYLE_INDENTGUIDE, 'Indentation Guides')
     Style(parent, stc.STC_STYLE_LINENUMBER, 'Line Number Margin')
     
+    style = Style(root, 1, name='Language Styles')
+    parent = style
+    Style(parent, 0, 'Character')
+    Style(parent, 0, 'Comment')
+    Style(parent, 0, 'Identifier')
+    Style(parent, 0, 'Keyword')
+    Style(parent, 0, 'Number')
+    Style(parent, 0, 'Operator')
+    Style(parent, 0, 'String')
+    Style(parent, 0, 'Whitespace')
+    Style(parent, 0, 'Class')
+    Style(parent, 0, 'Function')
+    
     # ADA
     ada = Style(root, name='ADA', preview='ADA Base Style')
     parent = ada
