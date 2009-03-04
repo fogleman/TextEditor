@@ -77,12 +77,6 @@ class Style(object):
             if child.number == number:
                 return child
         return None
-    def get_child_by_name(self, name):
-        name = name.lower()
-        for child in self._children:
-            if child.name.lower() == name:
-                return child
-        return None
     def create_font(self):
         return create_font(self.font, self.size, self.bold, self.italic, self.underline)
     def create_foreground(self):
@@ -399,7 +393,6 @@ class StyleDialog(wx.Dialog):
         buttons.AddStretchSpacer(1)
         ok = wx.Button(self, wx.ID_OK, 'OK')
         ok.Bind(wx.EVT_BUTTON, self.on_apply)
-        ok.SetDefault()
         cancel = wx.Button(self, wx.ID_CANCEL, 'Cancel')
         apply = wx.Button(self, wx.ID_APPLY, 'Apply')
         apply.Disable()
@@ -430,7 +423,6 @@ class StyleDialog(wx.Dialog):
         self.apply.Disable()
         StyleManager.instance.styles = copy.deepcopy(self.styles)
         StyleManager.instance.save_styles()
-        wx.PostEvent(self, StyleEvent(self, EVT_STYLE_CHANGED))
     def create_global_page(self, parent):
         page = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)

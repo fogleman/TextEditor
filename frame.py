@@ -354,12 +354,8 @@ class Frame(wx.Frame):
             wx.Execute(proc)
     def on_styles(self, event):
         dialog = styles.StyleDialog(self)
-        dialog.Bind(styles.EVT_STYLE_CHANGED, self.on_style_changed)
         dialog.Centre()
         dialog.ShowModal()
-    def on_style_changed(self, event):
-        for control in self.notebook.get_windows():
-            control.detect_language()
     def on_record_macro(self, event):
         self.get_control().toggle_macro()
     def on_play_macro(self, event):

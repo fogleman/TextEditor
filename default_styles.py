@@ -4,7 +4,7 @@ import util
 def create_style_tree():
     from styles import Style
     
-    root = Style(None, stc.STC_STYLE_DEFAULT, 'Global Style', None, 
+    root = Style(None, -1, 'Global Style', None, 
         util.get_font(), 10, False, False, False, 
         (0,0,0), (255,255,255))
         
@@ -17,19 +17,6 @@ def create_style_tree():
     Style(parent, stc.STC_STYLE_DEFAULT, 'Whitespace')
     Style(parent, stc.STC_STYLE_INDENTGUIDE, 'Indentation Guides')
     Style(parent, stc.STC_STYLE_LINENUMBER, 'Line Number Margin')
-    
-    style = Style(root, 1, name='Language Styles')
-    parent = style
-    Style(parent, 0, 'Character')
-    Style(parent, 0, 'Comment')
-    Style(parent, 0, 'Identifier')
-    Style(parent, 0, 'Keyword')
-    Style(parent, 0, 'Number')
-    Style(parent, 0, 'Operator')
-    Style(parent, 0, 'String')
-    Style(parent, 0, 'Whitespace')
-    Style(parent, 0, 'Class')
-    Style(parent, 0, 'Function')
     
     # ADA
     ada = Style(root, name='ADA', preview='ADA Base Style')
@@ -131,7 +118,7 @@ def create_style_tree():
     Style(parent, stc.STC_CSS_VALUE, 'Value')
 
     # C++
-    c = Style(root, name='CPP', preview='C++ Base Style')
+    c = Style(root, name='C++', preview='C++ Base Style')
     parent = c
     Style(parent, stc.STC_C_CHARACTER, 'Character')
     Style(parent, stc.STC_C_COMMENT, 'Comment')
