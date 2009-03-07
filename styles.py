@@ -1,5 +1,6 @@
 import wx
 import wx.stc as stc
+import copy
 import pickle
 import util
 
@@ -17,6 +18,8 @@ def create_font(name, size, bold=False, italic=False, underline=False):
 class StyleManager(object):
     def __init__(self):
         self.load()
+        self.language_defaults = create_languages(self.base_style)
+        self.cleanup()
     def load(self):
         try:
             file = open(STYLE_PATH, 'rb')
@@ -25,7 +28,6 @@ class StyleManager(object):
             self.app_styles = pickler.load()
             self.languages = pickler.load()
             file.close()
-            self.cleanup()
         except:
             self.base_style = create_base_style()
             self.app_styles = create_app_styles(self.base_style)
@@ -41,17 +43,19 @@ class StyleManager(object):
         except:
             pass
     def cleanup(self):
-        defaults = create_languages(self.base_style)
+        defaults = self.language_defaults
         languages = self.languages
         n1 = set(lang.name for lang in defaults)
         n2 = set(lang.name for lang in languages)
         new_names = n1 - n2
         old_names = n2 - n1
-        to_add = [lang for lang in defaults if lang.name in new_names]
+        to_add = [copy.deepcopy(lang) for lang in defaults if lang.name in new_names]
         to_remove = [lang for lang in languages if lang.name in old_names]
         for lang in to_remove:
             self.languages.remove(lang)
         self.languages.extend(to_add)
+    def get_language_default(self, language):
+        pass
     def get_language(self, extension):
         extension = extension.lower().strip('.')
         for language in self.languages:
