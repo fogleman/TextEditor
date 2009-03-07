@@ -64,7 +64,7 @@ class StyleControls(wx.Panel):
         style.underline = self.underline.GetValue()
         style.foreground = color_tuple(self.foreground.GetColour())
         style.background = color_tuple(self.background.GetColour())
-    def update_controls(self):
+    def update_controls(self, event=False):
         style = self.style
         if not style: return
         fonts = self.font.GetStrings()
@@ -78,6 +78,8 @@ class StyleControls(wx.Panel):
         self.underline.SetValue(style.underline)
         self.foreground.SetColour(style.create_foreground())
         self.background.SetColour(style.create_background())
+        if event:
+            wx.PostEvent(self, StyleEvent(self, EVT_STYLE_CHANGED))
     def create_font_box(self):
         grid = wx.FlexGridSizer(2, 2, 3, 10)
         grid.AddGrowableCol(0)
@@ -220,10 +222,10 @@ class StylePanel(wx.Panel):
         self.listbox.Refresh()
     def on_reset(self, event):
         self.listbox.reset()
-        self.controls.update_controls()
+        self.controls.update_controls(event=True)
     def on_reset_all(self, event):
         self.listbox.reset_all()
-        self.controls.update_controls()
+        self.controls.update_controls(event=True)
     def create_button_box(self):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.AddStretchSpacer(1)
@@ -318,10 +320,11 @@ class StyleDialog(wx.Dialog):
         self.app_styles = style_manager.app_styles
         self.languages = style_manager.languages
     def save(self):
-        self.style_manager.base_style = self.base_style
-        self.style_manager.app_styles = self.app_styles
-        self.style_manager.languages = self.languages
-        self.load()
+        data = (self.base_style, self.app_styles, self.languages)
+        data = copy.deepcopy(data)
+        self.style_manager.base_style = data[0]
+        self.style_manager.app_styles = data[1]
+        self.style_manager.languages = data[2]
         self.style_manager.save()
     def on_change(self, event):
         event.Skip()

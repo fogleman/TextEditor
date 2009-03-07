@@ -40,6 +40,7 @@ class StyleManager(object):
         except:
             pass
     def get_language(self, extension):
+        extension = extension.lower().strip('.')
         for language in self.languages:
             if extension in language.extensions:
                 return language
@@ -111,7 +112,7 @@ class Language(object):
         self.keywords2 = keywords2
         
 def create_base_style():
-    base_style = Style(None, -1, 'Global Style', None, 
+    base_style = Style(None, stc.STC_STYLE_DEFAULT, 'Global Style', None, 
         util.get_font(), 10, False, False, False, 
         (0,0,0), (255,255,255))
     return base_style
@@ -121,7 +122,6 @@ def create_app_styles(parent):
         Style(parent, stc.STC_STYLE_BRACELIGHT, 'Brace (Matched)'),
         Style(parent, stc.STC_STYLE_BRACEBAD, 'Brace (Unmatched)'),
         Style(parent, stc.STC_STYLE_CONTROLCHAR, 'Control Character'),
-        Style(parent, stc.STC_STYLE_DEFAULT, 'Whitespace'),
         Style(parent, stc.STC_STYLE_INDENTGUIDE, 'Indentation Guides'),
         Style(parent, stc.STC_STYLE_LINENUMBER, 'Line Number Margin'),
     ]

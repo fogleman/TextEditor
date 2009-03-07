@@ -4,42 +4,6 @@ import os
 import util
 from settings import settings
 
-EXTENSIONS = {
-'.ada': 'ada',
-'.asp': 'asp',
-'.bat': 'batch',
-'.conf': 'conf',
-'.c': 'cpp',
-'.h': 'cpp',
-'.hpp': 'cpp',
-'.cpp': 'cpp',
-'.diff': 'diff',
-'.xhtml': 'hypertext',
-'.html': 'hypertext',
-'.htm': 'hypertext',
-'.lisp': 'lisp',
-'.lua': 'lua',
-'makefile': 'makefile',
-'.tab': 'nncrontab',
-'.pascal': 'pascal',
-'.pl': 'perl',
-'.php': 'php',
-'.props': 'props',
-'.py': 'python',
-'.pyw': 'python',
-'.rb': 'ruby',
-'.sql': 'sql',
-'.tcl': 'tcl',
-'.vb': 'vb',
-'.vbscript': 'vbscript',
-'.xml': 'xml',
-}
-
-KEYWORDS = {
-    'cpp': settings.CPP_KEYWORDS,
-    'python': settings.PYTHON_KEYWORDS,
-}
-
 class EditorEvent(wx.PyEvent):
     def __init__(self, type, object=None):
         super(EditorEvent, self).__init__()
@@ -133,15 +97,10 @@ class EditorControl(stc.StyledTextCtrl):
         self.SetViewWhiteSpace(settings.VIEW_WHITESPACE)
         self.SetMargins(settings.MARGIN_LEFT, settings.MARGIN_RIGHT)
         
-        font = util.get_font()
-        size = settings.FONT_SIZE
-        self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, 'face:%s,size:%d,bold,fore:#FF0000' % (font, size+2))
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, 'face:%s,size:%d,bold,fore:pink' % (font, size+2))
-        
         self.apply_bookmark_settings()
         self.apply_folding_settings()
         self.show_line_numbers()
+        self.detect_language()
     def apply_bookmark_settings(self):
         if settings.BOOKMARKS:
             self.SetMarginType(self.BOOKMARK_MARGIN, stc.STC_MARGIN_SYMBOL)
@@ -189,14 +148,13 @@ class EditorControl(stc.StyledTextCtrl):
             self.EmptyUndoBuffer()
             self.edited = False
             self.file_path = path
-            self.detect_language()
         except IOError:
             self.SetText('')
         finally:
             if file:
                 file.close()
             self.mark_stat()
-            self.Colourise(0, self.GetLength())
+            self.detect_language()
     def save_file(self, path=None, force=False):
         path = path or self.file_path
         if not path:
@@ -210,35 +168,48 @@ class EditorControl(stc.StyledTextCtrl):
             file.write(text)
             self.edited = False
             self.file_path = path
-            self.detect_language()
             return True
         finally:
             if file:
                 file.close()
             self.mark_stat()
-            self.Colourise(0, self.GetLength())
+            self.detect_language()
         return False
     def reload_file(self):
         if self.file_path:
             self.open_file(self.file_path)
     def detect_language(self):
+        path = self.file_path
+        manager = self.get_frame().style_manager
+        if path:
+            pre, ext = os.path.splitext(path)
+            language = manager.get_language(ext)
+        else:
+            language = None
+        self.apply_language(manager, language)
+    def apply_language(self, manager, language):
         self.ClearDocumentStyle()
         self.SetKeyWords(0, '')
         self.SetLexer(stc.STC_LEX_NULL)
-        path = self.file_path
-        if path:
-            pre, ext = os.path.splitext(path)
-            ext = ext.lower()
-            if ext in EXTENSIONS:
-                language = EXTENSIONS[ext]
-                self.SetLexerLanguage(language)
-                if language in KEYWORDS:
-                    keywords = KEYWORDS[language]
-                    self.SetKeyWords(0, ' '.join(keywords.split()))
-                if language == 'python':
-                    self.apply_python()
-                if language == 'cpp':
-                    self.apply_cpp()
+        self.StyleResetDefault()
+        self.apply_style(manager.base_style)
+        self.StyleClearAll()
+        self.apply_styles(manager.app_styles)
+        if language:
+            self.SetLexer(language.lexer)
+            self.SetKeyWords(0, ' '.join(language.keywords.split()))
+            self.SetKeyWords(1, ' '.join(language.keywords2.split()))
+            self.apply_styles(language.styles)
+        self.Colourise(0, self.GetLength())
+    def apply_styles(self, styles):
+        for style in styles:
+            self.apply_style(style)
+    def apply_style(self, style):
+        s = style
+        id = s.number
+        self.StyleSetFontAttr(id, s.size, s.font, s.bold, s.italic, s.underline)
+        self.StyleSetBackground(id, s.create_background())
+        self.StyleSetForeground(id, s.create_foreground())
     def match_brace(self):
         invalid = stc.STC_INVALID_POSITION
         if settings.MATCH_BRACES:
@@ -490,45 +461,4 @@ class EditorControl(stc.StyledTextCtrl):
     def on_macrorecord(self, event):
         command = (event.GetMessage(), event.GetWParam(), event.GetLParam())
         self._macro.append(command)
-        
-    def apply_python(self):
-        font = util.get_font()
-        size = settings.FONT_SIZE
-        self.StyleSetSpec(stc.STC_P_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, size))
-        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'face:%s,size:%d,bold' % (font, size))
-        self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_P_DEFAULT, 'face:%s,size:%d,fore:grey' % (font, size))
-        self.StyleSetSpec(stc.STC_P_DEFNAME, 'face:%s,size:%d,bold,fore:maroon' % (font, size))
-        self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_P_NUMBER, 'face:%s,size:%d,fore:red' % (font, size))
-        self.StyleSetSpec(stc.STC_P_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, size))
-        self.StyleSetSpec(stc.STC_P_STRING, 'face:%s,size:%d,fore:grey' % (font, size))
-        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_P_TRIPLE, 'face:%s,size:%d,fore:#ff6a00' % (font, size))
-        self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'face:%s,size:%d,fore:#ff6a00' % (font, size))
-        self.StyleSetSpec(stc.STC_P_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
-        
-    def apply_cpp(self):
-        font = util.get_font()
-        size = settings.FONT_SIZE
-        self.StyleSetSpec(stc.STC_C_CHARACTER, 'face:%s,size:%d,fore:grey' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENT, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENTDOC, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENTDOCKEYWORD, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENTDOCKEYWORDERROR, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENTLINE, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_COMMENTLINEDOC, 'face:%s,size:%d,fore:forest green' % (font, size))
-        self.StyleSetSpec(stc.STC_C_DEFAULT, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_IDENTIFIER, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_NUMBER, 'face:%s,size:%d,fore:red' % (font, size))
-        self.StyleSetSpec(stc.STC_C_OPERATOR, 'face:%s,size:%d,bold,fore:navy' % (font, size))
-        self.StyleSetSpec(stc.STC_C_PREPROCESSOR, 'face:%s,size:%d,bold,fore:maroon' % (font, size))
-        self.StyleSetSpec(stc.STC_C_REGEX, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_STRING, 'face:%s,size:%d,fore:grey' % (font, size))
-        self.StyleSetSpec(stc.STC_C_STRINGEOL, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_UUID, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_VERBATIM, 'face:%s,size:%d' % (font, size))
-        self.StyleSetSpec(stc.STC_C_WORD, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
-        self.StyleSetSpec(stc.STC_C_WORD2, 'face:%s,size:%d,bold,fore:medium blue' % (font, size))
         
