@@ -10,10 +10,10 @@ sys.argv.append('py2exe')
 def get_data_files():
     def filter_files(files):
         def match(file):
-            extensions = ('.dat',)
-            for extension in extensions:
-                if file.endswith(extension):
-                    return True
+            #extensions = ('.dat',)
+            #for extension in extensions:
+            #    if file.endswith(extension):
+            #        return True
             return False
         return tuple(file for file in files if not match(file))
     def tree(src):
