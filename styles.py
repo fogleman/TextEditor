@@ -242,7 +242,142 @@ def create_languages(base_style):
     )
     result.append(java)
     
+    # C
+    style = Style(base_style, name='C Base Style')
+    c = Language(
+        name='C',
+        extensions=['c'],
+        lexer=stc.STC_LEX_CPP,
+        base_style=style,
+        styles=[
+            Style(style, stc.STC_C_CHARACTER, 'Character'),
+            Style(style, stc.STC_C_COMMENT, 'Comment'),
+            Style(style, stc.STC_C_COMMENTLINE, 'Comment Line'),
+            Style(style, stc.STC_C_DEFAULT, 'Whitespace'),
+            Style(style, stc.STC_C_IDENTIFIER, 'Identifier'),
+            Style(style, stc.STC_C_NUMBER, 'Number'),
+            Style(style, stc.STC_C_OPERATOR, 'Operator'),
+            Style(style, stc.STC_C_PREPROCESSOR, 'Preprocessor'),
+            Style(style, stc.STC_C_REGEX, 'Regex'),
+            Style(style, stc.STC_C_STRING, 'String'),
+            Style(style, stc.STC_C_STRINGEOL, 'String EOL'),
+            Style(style, stc.STC_C_UUID, 'Uuid'),
+            Style(style, stc.STC_C_VERBATIM, 'Verbatim'),
+            Style(style, stc.STC_C_WORD, 'Keyword'),
+            Style(style, stc.STC_C_WORD2, 'Keyword 2'),
+        ],
+        keywords='''
+            auto break case char const continue default do double else enum 
+            extern float for goto if int long register return short signed sizeof
+            static struct switch typedef union unsigned void volatile while
+        ''',
+        keywords2='''
+        ''',
+        keywords3='''
+        ''',
+        line_comment='//',
+        block_comment=('/*', '*/'),
+    )
+    result.append(c)
     
+    # C++
+    style = Style(base_style, name='C++ Base Style')
+    cpp = Language(
+        name='C++',
+        extensions=['h', 'hpp', 'hxx', 'cpp', 'cxx', 'cc'],
+        lexer=stc.STC_LEX_CPP,
+        base_style=style,
+        styles=[
+            Style(style, stc.STC_C_CHARACTER, 'Character'),
+            Style(style, stc.STC_C_COMMENT, 'Comment'),
+            Style(style, stc.STC_C_COMMENTDOC, 'Commentdoc'),
+            Style(style, stc.STC_C_COMMENTDOCKEYWORD, 'Commentdockeyword'),
+            Style(style, stc.STC_C_COMMENTDOCKEYWORDERROR, 'Commentdockeyworderror'),
+            Style(style, stc.STC_C_COMMENTLINE, 'Comment Line'),
+            Style(style, stc.STC_C_COMMENTLINEDOC, 'Commentlinedoc'),
+            Style(style, stc.STC_C_DEFAULT, 'Whitespace'),
+            Style(style, stc.STC_C_GLOBALCLASS, 'Globalclass'),
+            Style(style, stc.STC_C_IDENTIFIER, 'Identifier'),
+            Style(style, stc.STC_C_NUMBER, 'Number'),
+            Style(style, stc.STC_C_OPERATOR, 'Operator'),
+            Style(style, stc.STC_C_PREPROCESSOR, 'Preprocessor'),
+            Style(style, stc.STC_C_REGEX, 'Regex'),
+            Style(style, stc.STC_C_STRING, 'String'),
+            Style(style, stc.STC_C_STRINGEOL, 'String EOL'),
+            Style(style, stc.STC_C_UUID, 'Uuid'),
+            Style(style, stc.STC_C_VERBATIM, 'Verbatim'),
+            Style(style, stc.STC_C_WORD, 'Keyword'),
+            Style(style, stc.STC_C_WORD2, 'Keyword 2'),
+        ],
+        keywords='''
+            asm auto bool
+            break case catch char class const const_cast continue default delete
+            do double dynamic_cast else enum explicit export extern false float for
+            friend goto if inline int long mutable namespace new operator private
+            protected public register reinterpret_cast return short signed sizeof
+            static static_cast struct switch template this throw true try typedef
+            typeid typename union unsigned using virtual void volatile wchar_t while
+        ''',
+        keywords2='''
+        ''',
+        keywords3='''
+        ''',
+        line_comment='//',
+        block_comment=('/*', '*/'),
+    )
+    result.append(cpp)
+    
+    # CSS
+    style = Style(base_style, name='CSS Base Style')
+    css = Language(
+        name='CSS',
+        extensions=['css'],
+        lexer=stc.STC_LEX_CSS,
+        base_style=style,
+        styles=[
+            Style(style, stc.STC_CSS_ATTRIBUTE, 'Attribute'),
+            Style(style, stc.STC_CSS_CLASS, 'Class'),
+            Style(style, stc.STC_CSS_COMMENT, 'Comment'),
+            Style(style, stc.STC_CSS_DEFAULT, 'Whitespace'),
+            Style(style, stc.STC_CSS_DIRECTIVE, 'Directive'),
+            Style(style, stc.STC_CSS_DOUBLESTRING, 'Doublestring'),
+            Style(style, stc.STC_CSS_ID, 'ID'),
+            Style(style, stc.STC_CSS_IDENTIFIER, 'Identifier'),
+            Style(style, stc.STC_CSS_IDENTIFIER2, 'Identifier2'),
+            Style(style, stc.STC_CSS_IMPORTANT, 'Important'),
+            Style(style, stc.STC_CSS_OPERATOR, 'Operator'),
+            Style(style, stc.STC_CSS_PSEUDOCLASS, 'Pseudoclass'),
+            Style(style, stc.STC_CSS_SINGLESTRING, 'Singlestring'),
+            Style(style, stc.STC_CSS_TAG, 'Tag'),
+            Style(style, stc.STC_CSS_VALUE, 'Value'),
+        ],
+        keywords='''
+            azimuth background
+            background-attachment background-color background-image background-position
+            background-repeat border border-bottom border-bottom-color border-bottom-style
+            border-bottom-width border-collapse border-color border-left border-left-color
+            border-left-style border-left-width border-right border-right-color
+            border-right-style border-right-width border-spacing border-style border-top
+            border-top-color border-top-style border-top-width border-width bottom
+            caption-side clear clip color content counter-increment counter-reset cue
+            cue-after cue-before cursor direction display elevation empty-cells float
+            font font-family font-size font-size-adjust font-stretch font-style
+            font-variant font-weight height left letter-spacing line-height list-style
+            list-style-image list-style-position list-style-type margin margin-bottom
+            margin-left margin-right margin-top marker-offset marks max-height
+            max-width min-height min-width orphans outline outline-color outline-style
+            outline-width overflow padding padding-bottom padding-left padding-right
+            padding-top page page-break-after page-break-before page-break-inside
+            pause pause-after pause-before pitch pitch-range play-during
+            position quotes richness right size speak speak-header speak-numeral
+            speak-ponctuation speech-rate stress table-layout text-align text-decoration
+            text-indent text-shadow text-transform top unicode-bidi vertical-align
+            visibility voice-family volume white-space widows width word-spacing z-index
+        ''',
+        line_comment='',
+        block_comment=('/*', '*/'),
+    )
+    result.append(css)
     
     return result
     
