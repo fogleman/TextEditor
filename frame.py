@@ -30,7 +30,6 @@ class Frame(wx.Frame):
         self.SetIcon(wx.Icon('icons/page_edit.ico', wx.BITMAP_TYPE_ICO))
     def parse_args(self, args):
         self.Raise()
-        self.SetFocus()
         files = args.split(';')
         files = [file.strip() for file in files]
         files = filter(bool, files)
@@ -168,13 +167,13 @@ class Frame(wx.Frame):
         edit.AppendSeparator()
         util.menu_item(self, edit, 'Select All\tCtrl+A', self.on_select_all, 'table_go.png')
         edit.AppendSeparator()
-        util.menu_item(self, edit, 'Sort', self.on_sort, 'arrow_down.png')
-        util.menu_item(self, edit, 'Lowercase', self.on_lowercase, 'text_lowercase.png')
-        util.menu_item(self, edit, 'Uppercase', self.on_uppercase, 'text_uppercase.png')
-        edit.AppendSeparator()
         util.menu_item(self, edit, 'Indent\tTab', self.on_indent, 'text_indent.png')
         util.menu_item(self, edit, 'Unindent\tShift+Tab', self.on_unindent, 'text_indent_remove.png')
         util.menu_item(self, edit, 'Toggle Comment\tCtrl+/', self.on_comment, 'text_padding_left.png')
+        edit.AppendSeparator()
+        util.menu_item(self, edit, 'Sort', self.on_sort, 'arrow_down.png')
+        util.menu_item(self, edit, 'Lowercase', self.on_lowercase, 'text_lowercase.png')
+        util.menu_item(self, edit, 'Uppercase', self.on_uppercase, 'text_uppercase.png')
         menubar.Append(edit, '&Edit')
         
         search = wx.Menu()
@@ -198,7 +197,7 @@ class Frame(wx.Frame):
         menubar.Append(view, '&View')
         
         tools = wx.Menu()
-        util.menu_item(self, tools, 'Options...', self.on_event, 'cog.png')
+        util.menu_item(self, tools, 'Options...', self.on_event, 'cog.png').Enable(False)
         util.menu_item(self, tools, 'Fonts && Colors...', self.on_styles, 'palette.png')
         tools.AppendSeparator()
         util.menu_item(self, tools, 'Record Macro\tCtrl+Shift+R', self.on_record_macro, 'bullet_red.png')
