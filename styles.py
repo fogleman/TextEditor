@@ -5,6 +5,7 @@ import pickle
 import util
 
 STYLE_PATH = 'styles.dat'
+DEFAULT_STYLE_PATH = 'default-styles.dat'
 
 def create_color(red, green, blue):
     return wx.Colour(red, green, blue)
@@ -21,17 +22,20 @@ class StyleManager(object):
         self.language_defaults = create_languages(self.base_style)
         self.cleanup()
     def load(self):
-        try:
-            file = open(STYLE_PATH, 'rb')
-            pickler = pickle.Unpickler(file)
-            self.base_style = pickler.load()
-            self.app_styles = pickler.load()
-            self.languages = pickler.load()
-            file.close()
-        except:
-            self.base_style = create_base_style()
-            self.app_styles = create_app_styles(self.base_style)
-            self.languages = create_languages(self.base_style)
+        for path in (STYLE_PATH, DEFAULT_STYLE_PATH):
+            try:
+                file = open(path, 'rb')
+                pickler = pickle.Unpickler(file)
+                self.base_style = pickler.load()
+                self.app_styles = pickler.load()
+                self.languages = pickler.load()
+                file.close()
+                return
+            except:
+                pass
+        self.base_style = create_base_style()
+        self.app_styles = create_app_styles(self.base_style)
+        self.languages = create_languages(self.base_style)
     def save(self):
         try:
             file = open(STYLE_PATH, 'wb')
