@@ -264,7 +264,7 @@ class LanguageStyles(wx.Panel):
         languages.sort()
         control = self.choices
         control.Clear()
-        for language in languages:
+        for language in sorted(languages):
             control.Append(language.name, language)
         if languages:
             control.SetSelection(0)

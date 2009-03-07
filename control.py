@@ -198,7 +198,12 @@ class EditorControl(stc.StyledTextCtrl):
         if language:
             self.SetLexer(language.lexer)
             self.SetKeyWords(0, ' '.join(language.keywords.split()))
-            self.SetKeyWords(1, ' '.join(language.keywords2.split()))
+            for n in range(2, 8):
+                attr = 'keywords%d' % n
+                if not hasattr(language, attr):
+                    continue
+                keywords = getattr(language, attr)
+                self.SetKeyWords(n-1, ' '.join(keywords.split()))
             self.apply_styles(language.styles)
         self.Colourise(0, self.GetLength())
     def apply_styles(self, styles):

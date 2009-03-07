@@ -36,10 +36,6 @@ USE_TABS = False
 VIEW_WHITESPACE = True
 WORD_WRAP = False
 
-FONT_FACE = 'Bitstream Vera Sans Mono'
-FONT_SIZE = 10
-LANGUAGE = 'Python'
-
 AUI_NB_TAB_FIXED_WIDTH = False
 AUI_NB_SCROLL_BUTTONS = True
 AUI_NB_WINDOWLIST_BUTTON = True
@@ -82,13 +78,6 @@ FIND_DOWN = True
 FIND_WRAP = True
 REPLACE_TEXT = ''
 REPLACE_HISTORY = []
-
-PYTHON_KEYWORDS = \
-'''
-and del from not while as elif global or with assert else if pass yield
-break except import print class exec in raise continue finally is return
-def for lambda try False True None
-'''
 
 CPP_KEYWORDS = \
 '''

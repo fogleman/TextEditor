@@ -25,6 +25,7 @@ class StyleManager(object):
             self.app_styles = pickler.load()
             self.languages = pickler.load()
             file.close()
+            self.cleanup()
         except:
             self.base_style = create_base_style()
             self.app_styles = create_app_styles(self.base_style)
@@ -39,6 +40,18 @@ class StyleManager(object):
             file.close()
         except:
             pass
+    def cleanup(self):
+        defaults = create_languages(self.base_style)
+        languages = self.languages
+        n1 = set(lang.name for lang in defaults)
+        n2 = set(lang.name for lang in languages)
+        new_names = n1 - n2
+        old_names = n2 - n1
+        to_add = [lang for lang in defaults if lang.name in new_names]
+        to_remove = [lang for lang in languages if lang.name in old_names]
+        for lang in to_remove:
+            self.languages.remove(lang)
+        self.languages.extend(to_add)
     def get_language(self, extension):
         extension = extension.lower().strip('.')
         for language in self.languages:
@@ -61,9 +74,6 @@ class Style(object):
         self._underline = underline
         self._foreground = foreground
         self._background = background
-        self._children = []
-        if parent:
-            parent._children.append(self)
     def __cmp__(self, other):
         return cmp(self.preview, other.preview)
     def __setattr__(self, name, value):
@@ -88,11 +98,6 @@ class Style(object):
         self.underline = None
         self.foreground = None
         self.background = None
-    def get_child(self, number):
-        for child in self._children:
-            if child.number == number:
-                return child
-        return None
     def create_font(self):
         return create_font(self.font, self.size, self.bold, self.italic, self.underline)
     def create_foreground(self):
@@ -102,7 +107,8 @@ class Style(object):
         
 class Language(object):
     def __init__(self, name, extensions=[], lexer=stc.STC_LEX_NULL, 
-        base_style=None, styles=[], keywords='', keywords2=''):
+        base_style=None, styles=[], keywords='', keywords2='', keywords3='',
+        line_comment='', block_comment=('', '')):
         self.name = name
         self.extensions = extensions
         self.lexer = lexer
@@ -110,6 +116,9 @@ class Language(object):
         self.styles = styles
         self.keywords = keywords
         self.keywords2 = keywords2
+        self.keywords3 = keywords3
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
         
 def create_base_style():
     base_style = Style(None, stc.STC_STYLE_DEFAULT, 'Global Style', None, 
@@ -180,9 +189,56 @@ def create_languages(base_style):
             locals long map max min object oct open ord pow property quit range
             raw_input reduce reload repr reversed round set setattr slice sorted
             staticmethod str sum super tuple type unichr unicode vars xrange zip
-        '''
+        ''',
+        line_comment='#',
+        block_comment=("'''", "'''"),
     )
     result.append(python)
+    
+    # Java
+    style = Style(base_style, name='Java Base Style')
+    java = Language(
+        name='Java',
+        extensions=['java'],
+        lexer=stc.STC_LEX_CPP,
+        base_style=style,
+        styles=[
+            Style(style, stc.STC_C_CHARACTER, 'Character'),
+            Style(style, stc.STC_C_COMMENT, 'Comment'),
+            Style(style, stc.STC_C_COMMENTDOC, 'Commentdoc'),
+            Style(style, stc.STC_C_COMMENTDOCKEYWORD, 'Commentdockeyword'),
+            Style(style, stc.STC_C_COMMENTDOCKEYWORDERROR, 'Commentdockeyworderror'),
+            Style(style, stc.STC_C_COMMENTLINE, 'Comment Line'),
+            Style(style, stc.STC_C_COMMENTLINEDOC, 'Commentlinedoc'),
+            Style(style, stc.STC_C_DEFAULT, 'Whitespace'),
+            Style(style, stc.STC_C_IDENTIFIER, 'Identifier'),
+            Style(style, stc.STC_C_NUMBER, 'Number'),
+            Style(style, stc.STC_C_OPERATOR, 'Operator'),
+            Style(style, stc.STC_C_STRING, 'String'),
+            Style(style, stc.STC_C_STRINGEOL, 'String EOL'),
+            Style(style, stc.STC_C_WORD, 'Keyword'),
+            Style(style, stc.STC_C_WORD2, 'Keyword 2'),
+        ],
+        keywords='''
+            abstract continue for new switch assert default goto package synchronized
+            boolean do if private this break double implements protected throw
+            byte else import public throws case enum instanceof return transient
+            catch extends int short try char final interface static void
+            class finally long strictfp volatile const float native super while
+        ''',
+        keywords2='''
+        ''',
+        keywords3='''
+            author code docRoot deprecated exception
+            inheritDoc link linkplain literal param return see
+            serial serialData serialField since throws value version
+        ''',
+        line_comment='//',
+        block_comment=('/*', '*/'),
+    )
+    result.append(java)
+    
+    
     
     return result
     
