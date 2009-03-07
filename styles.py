@@ -52,8 +52,16 @@ class StyleManager(object):
         to_add = [copy.deepcopy(lang) for lang in defaults if lang.name in new_names]
         to_remove = [lang for lang in languages if lang.name in old_names]
         for lang in to_remove:
-            self.languages.remove(lang)
-        self.languages.extend(to_add)
+            languages.remove(lang)
+        languages.extend(to_add)
+        
+        for lang in languages:
+            for default in defaults:
+                if default.name == lang.name:
+                    break
+            else:
+                continue
+            lang.copy_from(default)
     def get_language_default(self, language):
         pass
     def get_language(self, extension):
@@ -121,6 +129,16 @@ class Language(object):
         self.keywords = keywords
         self.keywords2 = keywords2
         self.keywords3 = keywords3
+        self.line_comment = line_comment
+        self.block_comment = block_comment
+    def copy_from(self, other):
+        self.extensions = other.extensions
+        self.lexer = other.lexer
+        self.keywords = other.keywords
+        self.keywords2 = other.keywords2
+        self.keywords3 = other.keywords3
+        self.line_comment = other.line_comment
+        self.block_comment = other.block_comment
     def __cmp__(self, other):
         return cmp(self.name, other.name)
         

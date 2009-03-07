@@ -27,6 +27,7 @@ class EditorControl(stc.StyledTextCtrl):
         self._indic_dirty = [False]*3
         self._recording = False
         self._macro = []
+        self.language = None
         self.file_path = None
         self.mark_stat()
         self.apply_settings()
@@ -188,6 +189,7 @@ class EditorControl(stc.StyledTextCtrl):
             language = None
         self.apply_language(manager, language)
     def apply_language(self, manager, language):
+        self.language = language
         self.ClearDocumentStyle()
         self.SetKeyWords(0, '')
         self.SetLexer(stc.STC_LEX_NULL)
@@ -254,6 +256,29 @@ class EditorControl(stc.StyledTextCtrl):
         self.CmdKeyExecute(stc.STC_CMD_TAB)
     def unindent(self):
         self.CmdKeyExecute(stc.STC_CMD_BACKTAB)
+    def toggle_comment(self):
+        if not self.language:
+            return
+        comment = self.language.line_comment
+        if not comment:
+            return
+        self.BeginUndoAction()
+        a, b = self.GetSelection()
+        start, end = self.LineFromPosition(a), self.LineFromPosition(b)
+        if self.PositionFromLine(end) == b:
+            end -= 1
+        for line in range(start, end+1):
+            text = self.GetLine(line)
+            if text.startswith(comment):
+                text = text[len(comment):]
+            else:
+                text = comment + text
+            a, b = self.PositionFromLine(line), self.PositionFromLine(line+1)#-1
+            self.SetSelection(a, b)
+            self.ReplaceSelection(text)
+        a, b = self.PositionFromLine(start), self.PositionFromLine(end+1)
+        self.SetSelection(a, b)
+        self.EndUndoAction()
     def word_wrap(self):
         mode = self.GetWrapMode()
         if mode == stc.STC_WRAP_WORD:

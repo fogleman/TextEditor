@@ -174,6 +174,7 @@ class Frame(wx.Frame):
         edit.AppendSeparator()
         util.menu_item(self, edit, 'Indent\tTab', self.on_indent, 'text_indent.png')
         util.menu_item(self, edit, 'Unindent\tShift+Tab', self.on_unindent, 'text_indent_remove.png')
+        util.menu_item(self, edit, 'Toggle Comment\tCtrl+/', self.on_comment, 'text_padding_left.png')
         menubar.Append(edit, '&Edit')
         
         search = wx.Menu()
@@ -335,6 +336,8 @@ class Frame(wx.Frame):
         self.get_control().indent()
     def on_unindent(self, event):
         self.get_control().unindent()
+    def on_comment(self, event):
+        self.get_control().toggle_comment()
     def on_reload(self, event):
         self.get_control().reload_file()
     def on_delete_file(self, event):
