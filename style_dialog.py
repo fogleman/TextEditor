@@ -345,6 +345,7 @@ class StyleDialog(wx.Dialog):
         event.Skip()
         self.apply.Disable()
         self.save()
+        wx.PostEvent(self, StyleEvent(self, EVT_STYLE_CHANGED))
     def create_global_page(self, parent):
         page = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
