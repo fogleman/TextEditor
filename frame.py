@@ -8,11 +8,13 @@ import util
 import find
 import about
 import styles
+import style_dialog
 from settings import settings
 
 class Frame(wx.Frame):
     def __init__(self, parent=None, title=settings.APP_NAME):
         super(Frame, self).__init__(parent, -1, title)
+        self.style_manager = styles.StyleManager()
         manager = aui.AuiManager(self)
         self.manager = manager
         self.create_menu()
@@ -353,7 +355,7 @@ class Frame(wx.Frame):
             proc = 'explorer.exe /select,"%s"' % path
             wx.Execute(proc)
     def on_styles(self, event):
-        dialog = styles.StyleDialog(self)
+        dialog = style_dialog.StyleDialog(self, self.style_manager)
         dialog.Centre()
         dialog.ShowModal()
     def on_record_macro(self, event):
