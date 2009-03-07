@@ -273,7 +273,7 @@ class EditorControl(stc.StyledTextCtrl):
                 text = text[len(comment):]
             else:
                 text = comment + text
-            a, b = self.PositionFromLine(line), self.PositionFromLine(line+1)#-1
+            a, b = self.PositionFromLine(line), self.PositionFromLine(line+1)
             self.SetSelection(a, b)
             self.ReplaceSelection(text)
         a, b = self.PositionFromLine(start), self.PositionFromLine(end+1)
