@@ -1,10 +1,7 @@
-apply styling on save with new extension
 drag and drop both text and files
 
 File
-    Reload
     Rename
-    Delete
     Print
     Print Preview
     Page Setup
@@ -23,9 +20,6 @@ Format
 Run
 Tools
     Options
-    Record
-    Playback
-    Save Macro
 Help
     Help Contents
 

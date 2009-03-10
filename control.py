@@ -309,19 +309,26 @@ class EditorControl(stc.StyledTextCtrl):
             else:
                 self.SetSelection(pos, pos)
             self.EnsureCaretVisible()
-    def replace_all(self, text, replacement, flags=0):
+    def replace_all(self, text, replacement, flags=0, in_selection=False):
         if not text:
             return
-        index = 0
         length = len(text)
         rlength = len(replacement)
+        if in_selection:
+            start, end = self.GetSelection()
+        else:
+            start, end = 0, self.GetLength()
+        index = start
+        self.BeginUndoAction()
         while True:
             index = self.FindText(index, self.GetLength(), text, flags)
             if index < 0: break
+            if index + length > end: break
             self.SetSelection(index, index+length)
             self.ReplaceSelection(replacement)
             index += rlength
-            
+        self.EndUndoAction()
+        
     def get_indicator_mask(self, indicator):
         if indicator == 0: return stc.STC_INDIC0_MASK
         if indicator == 1: return stc.STC_INDIC1_MASK

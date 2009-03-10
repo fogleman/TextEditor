@@ -53,7 +53,8 @@ class Find(wx.Dialog):
         flags = self.create_flags()
         control = self.get_control()
         replacement = self.replacement.GetValue()
-        control.replace_all(text, replacement, flags)
+        in_selection = self.in_selection.GetValue()
+        control.replace_all(text, replacement, flags, in_selection)
         self.save_state()
         if self.close.GetValue():
             self.Close()
@@ -148,10 +149,12 @@ class Find(wx.Dialog):
         sizer.Add(self.create_options3(), 0, wx.EXPAND)
         sizer.AddSpacer(5)
         sizer.Add(self.create_options2(), 0, wx.EXPAND)
+        sizer.AddSpacer(5)
+        sizer.Add(self.create_options4(), 0, wx.EXPAND)
         return sizer
     def create_options1(self):
-        self.case = wx.CheckBox(self, -1, 'Match Case')
-        self.whole_word = wx.CheckBox(self, -1, 'Match Whole Word')
+        self.case = wx.CheckBox(self, -1, 'Case Sensitive')
+        self.whole_word = wx.CheckBox(self, -1, 'Whole Word')
         self.close = wx.CheckBox(self, -1, 'Close Dialog')
         box = wx.StaticBox(self, -1, 'Options')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -171,13 +174,26 @@ class Find(wx.Dialog):
         return sizer
     def create_options3(self):
         self.normal = wx.RadioButton(self, -1, 'Normal', style=wx.RB_GROUP)
-        self.extended = wx.RadioButton(self, -1, '\\n, \\t, etc.')
+        self.extended = wx.RadioButton(self, -1, '\\n, \\t...')
         self.regex = wx.RadioButton(self, -1, 'Regex')
         box = wx.StaticBox(self, -1, 'Mode')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         sizer.Add(self.normal, 0, wx.ALL, 5)
         sizer.Add(self.regex, 0, wx.ALL&~wx.TOP, 5)
         sizer.Add(self.extended, 0, wx.ALL&~wx.TOP, 5)
+        return sizer
+    def create_options4(self):
+        self.whole_file = wx.RadioButton(self, -1, 'File', style=wx.RB_GROUP)
+        self.in_selection = wx.RadioButton(self, -1, 'Selection')
+        if not self.replace:
+            self.in_selection.Disable()
+        self.open_files = wx.RadioButton(self, -1, 'All Files')
+        self.open_files.Disable()
+        box = wx.StaticBox(self, -1, 'Scope')
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        sizer.Add(self.whole_file, 0, wx.ALL, 5)
+        sizer.Add(self.in_selection, 0, wx.ALL&~wx.TOP, 5)
+        sizer.Add(self.open_files, 0, wx.ALL&~wx.TOP, 5)
         return sizer
     def create_buttons(self):
         find = util.button(self, 'Find Next', self.on_find)
