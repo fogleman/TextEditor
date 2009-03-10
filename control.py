@@ -156,6 +156,7 @@ class EditorControl(stc.StyledTextCtrl):
                 file.close()
             self.mark_stat()
             self.detect_language()
+            self.update_line_numbers()
     def save_file(self, path=None, force=False):
         path = path or self.file_path
         if not path:
