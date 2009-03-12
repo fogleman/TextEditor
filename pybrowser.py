@@ -62,7 +62,7 @@ class Parser(object):
         
 class Control(wx.TreeCtrl):
     def __init__(self, parent, root=None):
-        super(Control, self).__init__(parent, -1, style=wx.TR_HIDE_ROOT|wx.TR_FULL_ROW_HIGHLIGHT|wx.TR_NO_LINES)
+        super(Control, self).__init__(parent, -1, style=wx.TR_HIDE_ROOT|wx.TR_FULL_ROW_HIGHLIGHT|wx.TR_NO_LINES|wx.BORDER_STATIC)
         self.set_root(root)
         font = self.GetFont()
         font.SetFaceName('Bitstream Vera Sans Mono')
