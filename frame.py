@@ -84,7 +84,7 @@ class Frame(wx.Frame):
         view = pybrowser.Control(self)
         info = aui.AuiPaneInfo()
         info.Right()
-        info.Caption('File Browser')
+        info.Caption('Class Browser')
         self.manager.AddPane(view, info)
         self.browser_view = view
     def rebuild_file_menu(self):
