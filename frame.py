@@ -425,8 +425,9 @@ class Frame(wx.Frame):
         self.update_browser()
     def update_browser(self):
         control = self.get_control()
-        path = control.file_path.lower()
-        if path.endswith('.py') or path.endswith('.pyw'):
+        path = control.file_path or ''
+        path = path.lower()
+        if path and (path.endswith('.py') or path.endswith('.pyw')):
             self.browser_view.set_control(self.get_control())
             show = True
         else:
