@@ -1,4 +1,5 @@
 import wx
+import wx.stc as stc
 import util
 
 class Node(object):
@@ -61,34 +62,58 @@ class Parser(object):
         return root
         
 class Control(wx.TreeCtrl):
-    def __init__(self, parent, root=None):
+    def __init__(self, parent):
         super(Control, self).__init__(parent, -1, style=wx.TR_HIDE_ROOT|wx.TR_FULL_ROW_HIGHLIGHT|wx.TR_NO_LINES|wx.BORDER_STATIC)
-        self.set_root(root)
+        self.control = None
+        self.cache = None
         font = self.GetFont()
-        font.SetFaceName('Bitstream Vera Sans Mono')
         font.SetPointSize(10)
         self.SetFont(font)
-        images = wx.ImageList(16, 16, False)
+        images = wx.ImageList(16, 16)
         images.Add(util.get_icon('bullet_go.png'))
         images.Add(util.get_icon('bullet_orange.png'))
         self.SetImageList(images)
         self.images = images
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
+    def set_control(self, control):
+        if self.control:
+            self.control.Unbind(stc.EVT_STC_CHANGE)#, self.on_change)
+        self.control = control
+        self.control.Bind(stc.EVT_STC_CHANGE, self.on_change)
+        wx.CallAfter(self.update)
+    def on_change(self, event):
+        event.Skip()
+        control = self.control
+        cache = (control, control.GetLineCount() if control else 0)
+        if cache != self.cache:
+            self.cache = cache
+            wx.CallAfter(self.update)
+    def update(self):
+        control = self.control
+        if not control: return
+        text = control.GetText()
+        parser = Parser()
+        result = parser.parse_string(text)
+        self.set_root(result)
     def on_sel_changed(self, event):
         item = self.GetSelection()
-        data = self.GetPyData(item)
-        print data.line
+        control = self.control
+        if item.IsOk() and control:
+            data = self.GetPyData(item)
+            p1 = control.PositionFromLine(data.line-1)
+            p2 = control.PositionFromLine(data.line)-1
+            control.SetSelection(p1, p2)
+            control.EnsureCaretVisible()
     def set_root(self, node):
+        self.Freeze()
+        self.UnselectAll()
         self.DeleteAllItems()
-        if not node: return
-        root = self.AddRoot('')
-        top = None
-        for i, child in enumerate(node.children):
-            item = self.add_node(root, child)
-            self.Expand(item)
-            if i == 0: top = item
-        if top:
-            self.SelectItem(top)
+        if node:
+            root = self.AddRoot('')
+            for i, child in enumerate(node.children):
+                item = self.add_node(root, child)
+                self.Expand(item)
+        self.Thaw()
     def add_node(self, parent, node):
         item = self.AppendItem(parent, node.text)
         self.SetPyData(item, node)

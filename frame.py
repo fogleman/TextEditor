@@ -7,6 +7,7 @@ import notebook
 import util
 import find
 import about
+import pybrowser
 import styles
 import style_dialog
 from settings import settings
@@ -21,6 +22,7 @@ class Frame(wx.Frame):
         self.create_statusbar()
         self.create_notebook()
         self.create_toolbars()
+        self.create_browser()
         manager.Update()
         self.load_state()
         self.notebook.load_state()
@@ -78,6 +80,13 @@ class Frame(wx.Frame):
         info.Top()
         toolbar = self.create_main_toolbar()
         self.manager.AddPane(toolbar, info)
+    def create_browser(self):
+        view = pybrowser.Control(self)
+        info = aui.AuiPaneInfo()
+        info.Right()
+        info.Caption('File Browser')
+        self.manager.AddPane(view, info)
+        self.browser_view = view
     def rebuild_file_menu(self):
         self.GetMenuBar().Replace(0, self.create_file_menu(), '&File')
     def create_context_menu(self, control):
@@ -413,6 +422,18 @@ class Frame(wx.Frame):
         event.Skip()
         self.update_title()
         self.check_file_modifications()
+        self.update_browser()
+    def update_browser(self):
+        control = self.get_control()
+        path = control.file_path.lower()
+        if path.endswith('.py') or path.endswith('.pyw'):
+            self.browser_view.set_control(self.get_control())
+            show = True
+        else:
+            show = False
+        pane = self.manager.GetPane(self.browser_view)
+        pane.Show(show)
+        self.manager.Update()
     def check_file_modifications(self):
         for tab in self.notebook.get_windows():
             if not tab.check_stat():
