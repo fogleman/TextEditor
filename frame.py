@@ -23,10 +23,10 @@ class Frame(wx.Frame):
         self.create_notebook()
         self.create_toolbars()
         self.create_browser()
-        manager.Update()
         self.load_state()
         self.notebook.load_state()
         self.rebuild_file_menu()
+        manager.Update()
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
         self.SetIcon(wx.Icon('icons/page_edit.ico', wx.BITMAP_TYPE_ICO))
@@ -55,6 +55,8 @@ class Frame(wx.Frame):
                 settings.MAIN_WINDOW_MAXIMIZED = False
                 settings.MAIN_WINDOW_SIZE = self.GetSize()
                 settings.MAIN_WINDOW_POSITION = self.GetPosition()
+        manager = self.manager
+        settings.PYBROWSER_INFO = manager.SavePaneInfo(manager.GetPane(self.browser_view))
     def load_state(self):
         if settings.MAIN_WINDOW_PERSISTED:
             self.set_default_size()
@@ -62,6 +64,9 @@ class Frame(wx.Frame):
             self.SetSize(settings.MAIN_WINDOW_SIZE)
             self.SetPosition(settings.MAIN_WINDOW_POSITION)
             self.Maximize(settings.MAIN_WINDOW_MAXIMIZED)
+        manager = self.manager
+        if settings.PYBROWSER_INFO:
+            manager.LoadPaneInfo(settings.PYBROWSER_INFO, manager.GetPane(self.browser_view))
     def create_notebook(self):
         tabs = notebook.Notebook(self)
         self.notebook = tabs
@@ -85,6 +90,8 @@ class Frame(wx.Frame):
         info = aui.AuiPaneInfo()
         info.Right()
         info.Caption('Class Browser')
+        info.BestSize((250, 250))
+        info.Hide()
         self.manager.AddPane(view, info)
         self.browser_view = view
     def rebuild_file_menu(self):
