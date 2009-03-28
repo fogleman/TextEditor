@@ -401,5 +401,40 @@ def create_languages(base_style):
     )
     result.append(css)
     
+    # HTML
+    style = Style(base_style, name='HTML Base Style')
+    html = Language(
+        name='HTML',
+        extensions=['html', 'htm', 'shtml', 'shtm', 'xhtml'],
+        lexer=stc.STC_LEX_HTML,
+        base_style=style,
+        styles=[
+            Style(style, stc.STC_H_ATTRIBUTE, 'Attribute'),
+            Style(style, stc.STC_H_ATTRIBUTEUNKNOWN, 'Attribute Unknown'),
+            Style(style, stc.STC_H_CDATA, 'CDATA'),
+            Style(style, stc.STC_H_COMMENT, 'Comment'),
+            Style(style, stc.STC_H_DEFAULT, 'Whitespace'),
+            Style(style, stc.STC_H_DOUBLESTRING, 'Double String'),
+            Style(style, stc.STC_H_ENTITY, 'Entity'),
+            Style(style, stc.STC_H_NUMBER, 'Number'),
+            Style(style, stc.STC_H_OTHER, 'Other'),
+            Style(style, stc.STC_H_QUESTION, 'Question'),
+            Style(style, stc.STC_H_SCRIPT, 'Script'),
+            Style(style, stc.STC_H_SINGLESTRING, 'Single String'),
+            Style(style, stc.STC_H_TAG, 'Tag'),
+            Style(style, stc.STC_H_TAGEND, 'Tag End'),
+            Style(style, stc.STC_H_TAGUNKNOWN, 'Tag Unknown'),
+            Style(style, stc.STC_H_VALUE, 'Value'),
+            Style(style, stc.STC_H_XCCOMMENT, 'Xccomment'),
+            Style(style, stc.STC_H_XMLEND, 'XML End'),
+            Style(style, stc.STC_H_XMLSTART, 'XML Start'),
+        ],
+        keywords='''
+        ''',
+        line_comment='',
+        block_comment=('<!--', '-->'),
+    )
+    result.append(html)
+    
     return result
     

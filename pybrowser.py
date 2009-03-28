@@ -79,7 +79,8 @@ class Control(wx.TreeCtrl):
         if self.control:
             self.control.Unbind(stc.EVT_STC_CHANGE)#, self.on_change)
         self.control = control
-        self.control.Bind(stc.EVT_STC_CHANGE, self.on_change)
+        if control:
+            self.control.Bind(stc.EVT_STC_CHANGE, self.on_change)
         wx.CallAfter(self.update)
     def on_change(self, event):
         event.Skip()
@@ -90,11 +91,13 @@ class Control(wx.TreeCtrl):
             wx.CallAfter(self.update)
     def update(self):
         control = self.control
-        if not control: return
-        text = control.GetText()
-        parser = Parser()
-        result = parser.parse_string(text)
-        self.set_root(result)
+        if control:
+            text = control.GetText()
+            parser = Parser()
+            result = parser.parse_string(text)
+            self.set_root(result)
+        else:
+            self.set_root(None)
     def on_sel_changed(self, event):
         item = self.GetSelection()
         control = self.control

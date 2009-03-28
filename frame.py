@@ -203,6 +203,7 @@ class Frame(wx.Frame):
         util.menu_item(self, view, 'Previous Tab\tCtrl+Shift+Tab', self.on_previous_tab, 'arrow_left.png')
         view.AppendSeparator()
         util.menu_item(self, view, 'Toggle Word Wrap', self.on_word_wrap, 'text_padding_bottom.png')
+        util.menu_item(self, view, 'Toggle Class Browser', self.on_class_browser, 'blank.png')
         menubar.Append(view, '&View')
         
         tools = wx.Menu()
@@ -423,18 +424,19 @@ class Frame(wx.Frame):
         self.update_title()
         self.check_file_modifications()
         self.update_browser()
+    def on_class_browser(self, event):
+        view = self.browser_view
+        info = self.manager.GetPane(view)
+        info.Show(not info.IsShown())
+        self.manager.Update()
     def update_browser(self):
         control = self.get_control()
         path = control.file_path or ''
         path = path.lower()
         if path and (path.endswith('.py') or path.endswith('.pyw')):
             self.browser_view.set_control(self.get_control())
-            show = True
         else:
-            show = False
-        pane = self.manager.GetPane(self.browser_view)
-        pane.Show(show)
-        self.manager.Update()
+            self.browser_view.set_control(None)
     def check_file_modifications(self):
         for tab in self.notebook.get_windows():
             if not tab.check_stat():
