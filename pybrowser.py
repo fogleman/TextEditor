@@ -106,7 +106,7 @@ class Control(wx.TreeCtrl):
             p1 = control.PositionFromLine(data.line-1)
             p2 = control.PositionFromLine(data.line)-1
             control.SetSelection(p1, p2)
-            control.EnsureCaretVisible()
+            control.ScrollToLine(data.line-control.LinesOnScreen()/2)
     def set_root(self, node):
         self.Freeze()
         self.UnselectAll()
